@@ -1,0 +1,11 @@
+com\algolab\algorithms\Factorial.class
+com\algolab\algorithms\Fibonacci.class
+com\algolab\algorithms\BubbleSort.class
+com\algolab\algorithms\SelectionSort.class
+com\algolab\algorithms\FibonacciTest.class
+com\algolab\algorithms\sortingTest.class
+com\algolab\algorithms\MergeSort.class
+com\algolab\Main$SortResult.class
+com\algolab\Main.class
+com\algolab\algorithms\FactorialTest.class
+com\algolab\algorithms\InsertionSort.class
