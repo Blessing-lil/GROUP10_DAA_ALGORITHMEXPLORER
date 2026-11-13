@@ -1,24 +1,52 @@
 
 package com.algolab;
 
-import com.algolab.algorithms.Fibonacci;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
 import com.algolab.algorithms.Factorial;
+import com.algolab.algorithms.Fibonacci;
 import com.algolab.algorithms.TowerofHanoi;
+import com.algolab.analysis.AnalysisResult;
+import com.algolab.analysis.ComplexityAnalyzer;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Separator;
+import javafx.scene.control.Slider;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
-import java.util.Arrays;
 
 public class Main extends Application {
 
@@ -104,10 +132,7 @@ public class Main extends Application {
                 )));
 
         analysisButton.setOnAction(e ->
-                showPage(root, createModulePage(
-                        "Time Complexity Analysis",
-                        "Measure algorithm performance and study computational complexity."
-                )));
+                showPage(root, createComplexityPage()));
 
         Scene scene = new Scene(root, 1200, 780);
 
@@ -1333,6 +1358,295 @@ public class Main extends Application {
         );
 
         return button;
+    }
+
+    // TIME COMPLEXITY ANALYSIS PAGE
+    private VBox createComplexityPage() {
+
+        VBox page = new VBox(20);
+        page.setPadding(new Insets(35));
+        page.setStyle("-fx-background-color: " + LIGHT_GREY + ";");
+
+        Label heading = new Label("Time Complexity Analysis");
+        heading.setStyle(
+                "-fx-font-size: 28px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-text-fill: " + BURGUNDY + ";"
+        );
+
+        Label description = new Label(
+                "Benchmark sorting algorithms with different input sizes and arrangements."
+        );
+        description.setWrapText(true);
+
+        ComboBox<String> algorithmChoice = new ComboBox<>();
+        algorithmChoice.getItems().addAll(
+                "All Algorithms",
+                "Bubble Sort",
+                "Selection Sort",
+                "Insertion Sort",
+                "Merge Sort",
+                "Quick Sort (First Pivot)",
+                "Quick Sort (Random Pivot)"
+        );
+        algorithmChoice.setValue("All Algorithms");
+        algorithmChoice.setMaxWidth(Double.MAX_VALUE);
+
+        ComboBox<Integer> sizeChoice = new ComboBox<>();
+        sizeChoice.getItems().addAll(
+                100, 500, 1_000, 2_000, 5_000, 10_000, 50_000, 100_000
+        );
+        sizeChoice.setValue(1_000);
+        sizeChoice.setMaxWidth(Double.MAX_VALUE);
+
+        ComboBox<String> inputTypeChoice = new ComboBox<>();
+        inputTypeChoice.getItems().addAll("Random", "Sorted", "Reverse Sorted");
+        inputTypeChoice.setValue("Random");
+        inputTypeChoice.setMaxWidth(Double.MAX_VALUE);
+
+        Button runButton = createActionButton("Run Analysis");
+        ProgressIndicator progress = new ProgressIndicator();
+        progress.setPrefSize(26, 26);
+        progress.setVisible(false);
+        Label status = new Label("Choose options and run a benchmark.");
+        status.setWrapText(true);
+
+        TableView<AnalysisResult> resultsTable = new TableView<>();
+        resultsTable.setPlaceholder(new Label("Run an analysis to see results."));
+        resultsTable.setColumnResizePolicy(
+                TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN
+        );
+        resultsTable.setPrefHeight(230);
+
+        TableColumn<AnalysisResult, String> algorithmColumn =
+                new TableColumn<>("Algorithm");
+        algorithmColumn.setCellValueFactory(cell ->
+                new javafx.beans.property.ReadOnlyStringWrapper(
+                        cell.getValue().getAlgorithm()
+                ));
+
+        TableColumn<AnalysisResult, String> timeColumn =
+                new TableColumn<>("Average Time (ms)");
+        timeColumn.setCellValueFactory(cell ->
+                new javafx.beans.property.ReadOnlyStringWrapper(
+                        String.format("%.3f", cell.getValue().getExecutionTimeMs())
+                ));
+
+        TableColumn<AnalysisResult, String> comparisonsColumn =
+                new TableColumn<>("Comparisons");
+        comparisonsColumn.setCellValueFactory(cell ->
+                new javafx.beans.property.ReadOnlyStringWrapper(
+                        String.format("%.1f", cell.getValue().getComparisons())
+                ));
+
+        TableColumn<AnalysisResult, String> swapsColumn =
+                new TableColumn<>("Swaps");
+        swapsColumn.setCellValueFactory(cell ->
+                new javafx.beans.property.ReadOnlyStringWrapper(
+                        String.format("%.1f", cell.getValue().getSwaps())
+                ));
+
+        TableColumn<AnalysisResult, String> movesColumn =
+                new TableColumn<>("Moves");
+        movesColumn.setCellValueFactory(cell ->
+                new javafx.beans.property.ReadOnlyStringWrapper(
+                        String.format("%.1f", cell.getValue().getMoves())
+                ));
+
+        resultsTable.getColumns().addAll(
+                algorithmColumn,
+                timeColumn,
+                comparisonsColumn,
+                swapsColumn,
+                movesColumn
+        );
+
+        NumberAxis quadraticXAxis = new NumberAxis();
+        quadraticXAxis.setLabel("Input size");
+        NumberAxis quadraticYAxis = new NumberAxis();
+        quadraticYAxis.setLabel("Average execution time (ms)");
+        LineChart<Number, Number> quadraticChart =
+                new LineChart<>(quadraticXAxis, quadraticYAxis);
+        quadraticChart.setTitle("O(n²) Algorithms");
+        quadraticChart.setAnimated(false);
+        quadraticChart.setCreateSymbols(false);
+        quadraticChart.setPrefHeight(320);
+
+        NumberAxis efficientXAxis = new NumberAxis();
+        efficientXAxis.setLabel("Input size");
+        NumberAxis efficientYAxis = new NumberAxis();
+        efficientYAxis.setLabel("Average execution time (ms)");
+        LineChart<Number, Number> efficientChart =
+                new LineChart<>(efficientXAxis, efficientYAxis);
+        efficientChart.setTitle("O(n log n) Algorithms");
+        efficientChart.setAnimated(false);
+        efficientChart.setCreateSymbols(false);
+        efficientChart.setPrefHeight(320);
+
+        Map<String, TreeMap<Integer, Double>> chartTimes = new HashMap<>();
+        Map<String, XYChart.Series<Number, Number>> chartSeries = new HashMap<>();
+        addChartSeries(quadraticChart, chartTimes, chartSeries, "Bubble Sort");
+        addChartSeries(quadraticChart, chartTimes, chartSeries, "Selection Sort");
+        addChartSeries(quadraticChart, chartTimes, chartSeries, "Insertion Sort");
+        addChartSeries(efficientChart, chartTimes, chartSeries, "Merge Sort");
+        addChartSeries(efficientChart, chartTimes, chartSeries, "Quick Sort (First Pivot)");
+        addChartSeries(efficientChart, chartTimes, chartSeries, "Quick Sort (Random Pivot)");
+
+        String[] chartInputType = {null};
+        runButton.setOnAction(event -> {
+            int size = sizeChoice.getValue();
+            String inputType = inputTypeChoice.getValue();
+            String selectedAlgorithm = algorithmChoice.getValue();
+
+            if (size > 10_000
+                    && ("Bubble Sort".equals(selectedAlgorithm)
+                    || "Selection Sort".equals(selectedAlgorithm)
+                    || "Insertion Sort".equals(selectedAlgorithm))) {
+                showAnalysisWarning(
+                        "Quadratic algorithms are limited to input sizes of 10,000 or less."
+                );
+                return;
+            }
+
+            boolean orderedInput = !"Random".equals(inputType);
+            if (size > 10_000 && orderedInput
+                    && "Quick Sort (First Pivot)".equals(selectedAlgorithm)) {
+                showAnalysisWarning(
+                        "First-pivot quicksort can take quadratic time on sorted or reverse-sorted data. " +
+                        "Choose Merge Sort or Quick Sort (Random Pivot) for this benchmark."
+                );
+                return;
+            }
+
+            runButton.setDisable(true);
+            progress.setVisible(true);
+            status.setText("Running three repetitions in the background...");
+
+            Task<List<AnalysisResult>> analysisTask = new Task<>() {
+                @Override
+                protected List<AnalysisResult> call() {
+                    if (size <= 10_000) {
+                        return ComplexityAnalyzer.analyzeAll(size, inputType);
+                    }
+                    return ComplexityAnalyzer.analyzeEfficient(size, inputType);
+                }
+            };
+
+            analysisTask.setOnSucceeded(done -> {
+                List<AnalysisResult> results = analysisTask.getValue();
+                if (!inputType.equals(chartInputType[0])) {
+                    chartTimes.values().forEach(TreeMap::clear);
+                    chartInputType[0] = inputType;
+                }
+
+                for (AnalysisResult result : results) {
+                    chartTimes.get(result.getAlgorithm()).put(
+                            size, result.getExecutionTimeMs()
+                    );
+                    refreshChartSeries(result.getAlgorithm(), chartTimes, chartSeries);
+                }
+
+                resultsTable.getItems().setAll(results.stream()
+                        .filter(result -> "All Algorithms".equals(selectedAlgorithm)
+                                || selectedAlgorithm.equals(result.getAlgorithm()))
+                        .toList());
+
+                String omitted = size > 10_000 && orderedInput
+                        ? " Quadratic sorts and first-pivot quicksort are omitted for this input."
+                        : size > 10_000
+                                ? " Quadratic sorts are omitted above 10,000."
+                                : "";
+                status.setText(
+                        "Completed " + resultsTable.getItems().size() +
+                        " displayed benchmark(s) for " + size + " " + inputType +
+                        " values. Results are averages of three runs." + omitted
+                );
+                progress.setVisible(false);
+                runButton.setDisable(false);
+            });
+
+            analysisTask.setOnFailed(done -> {
+                Throwable failure = analysisTask.getException();
+                progress.setVisible(false);
+                runButton.setDisable(false);
+                status.setText("Analysis failed.");
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Analysis Failed");
+                alert.setHeaderText("The sorting benchmark could not be completed.");
+                alert.setContentText(failure == null || failure.getMessage() == null
+                        ? "An unexpected error occurred."
+                        : failure.getMessage());
+                alert.showAndWait();
+            });
+
+            Thread analysisThread = new Thread(
+                    analysisTask, "sorting-complexity-analysis"
+            );
+            analysisThread.setDaemon(true);
+            analysisThread.start();
+        });
+
+        GridPane controls = new GridPane();
+        controls.setHgap(12);
+        controls.setVgap(10);
+        controls.add(new Label("Algorithm"), 0, 0);
+        controls.add(algorithmChoice, 1, 0);
+        controls.add(new Label("Input size"), 2, 0);
+        controls.add(sizeChoice, 3, 0);
+        controls.add(new Label("Input type"), 4, 0);
+        controls.add(inputTypeChoice, 5, 0);
+        controls.add(runButton, 6, 0);
+        controls.add(progress, 7, 0);
+        controls.add(status, 0, 1, 8, 1);
+        for (int column = 1; column < 8; column++) {
+            ColumnConstraints constraint = new ColumnConstraints();
+            constraint.setHgrow(Priority.ALWAYS);
+            controls.getColumnConstraints().add(constraint);
+        }
+
+        page.getChildren().addAll(
+                heading,
+                new Separator(),
+                description,
+                createInfoCard("Benchmark Controls", controls),
+                createInfoCard("Results", resultsTable),
+                createInfoCard("Performance Charts", quadraticChart, efficientChart)
+        );
+        return page;
+    }
+
+    private void addChartSeries(
+            LineChart<Number, Number> chart,
+            Map<String, TreeMap<Integer, Double>> chartTimes,
+            Map<String, XYChart.Series<Number, Number>> chartSeries,
+            String algorithm
+    ) {
+        TreeMap<Integer, Double> times = new TreeMap<>();
+        XYChart.Series<Number, Number> series = new XYChart.Series<>();
+        series.setName(algorithm);
+        chartTimes.put(algorithm, times);
+        chartSeries.put(algorithm, series);
+        chart.getData().add(series);
+    }
+
+    private void refreshChartSeries(
+            String algorithm,
+            Map<String, TreeMap<Integer, Double>> chartTimes,
+            Map<String, XYChart.Series<Number, Number>> chartSeries
+    ) {
+        XYChart.Series<Number, Number> series = chartSeries.get(algorithm);
+        series.getData().setAll(chartTimes.get(algorithm).entrySet().stream()
+                .map(entry -> new XYChart.Data<Number, Number>(
+                        entry.getKey(), entry.getValue()
+                ))
+                .toList());
+    }
+
+    private void showAnalysisWarning(String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING, message, ButtonType.OK);
+        alert.setTitle("Unsupported Benchmark");
+        alert.setHeaderText("Choose a safer algorithm and input size.");
+        alert.showAndWait();
     }
 
     // OTHER MODULE PAGES
