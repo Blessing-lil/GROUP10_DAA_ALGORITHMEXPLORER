@@ -2,6 +2,7 @@
 package com.algolab;
 
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +39,11 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -110,20 +115,17 @@ public class Main extends Application {
 
         root.setLeft(sidebarScroll);
 
-        showPage(root, createDashboard());
+        showPage(root, createDashboard(root));
 
         // NAVIGATION
         dashboardButton.setOnAction(e ->
-                showPage(root, createDashboard()));
+                showPage(root, createDashboard(root)));
 
         recursionButton.setOnAction(e ->
                 showPage(root, createRecursionPage()));
 
         dataButton.setOnAction(e ->
-                showPage(root, createModulePage(
-                        "Data Structures Lab",
-                        "Explore arrays, stacks, queues and linked lists."
-                )));
+        showPage(root, createDataStructuresPage(root)));
 
         sortingButton.setOnAction(e ->
                 showPage(root, createModulePage(
@@ -196,8 +198,7 @@ public class Main extends Application {
     }
 
     // DASHBOARD
-    private VBox createDashboard() {
-
+    private VBox createDashboard(BorderPane root) {
         VBox page = new VBox(22);
         page.setPadding(new Insets(35));
         page.setStyle("-fx-background-color: " + LIGHT_GREY + ";");
@@ -226,25 +227,49 @@ public class Main extends Application {
                 columnConstraint()
         );
 
-        cards.add(createCard(
-                "Recursion Lab",
-                "Explore Fibonacci, Factorial and Tower of Hanoi."
-        ), 0, 0);
+        VBox recursionCard = createCard(
+        "Recursion Lab",
+        "Explore Fibonacci, Factorial and Tower of Hanoi."
+        );
 
-        cards.add(createCard(
+        VBox dataCard = createCard(
                 "Data Structures Lab",
                 "Learn stacks, queues, arrays and linked lists."
-        ), 1, 0);
+        );
 
-        cards.add(createCard(
+        VBox sortingCard = createCard(
                 "Sorting Lab",
                 "Explore and compare sorting algorithms."
-        ), 0, 1);
+        );
 
-        cards.add(createCard(
+        VBox analysisCard = createCard(
                 "Time Complexity Analysis",
                 "Benchmark algorithms and compare performance."
-        ), 1, 1);
+        );
+
+        // MAKE DASHBOARD CARDS CLICKABLE
+
+        recursionCard.setOnMouseClicked(e ->
+                showPage(root, createRecursionPage()));
+
+        dataCard.setOnMouseClicked(e ->
+                showPage(root, createDataStructuresPage(root)));
+
+        sortingCard.setOnMouseClicked(e ->
+                showPage(root, createModulePage(
+                        "Sorting Lab",
+                        "Explore and compare different sorting algorithms."
+                )));
+
+        analysisCard.setOnMouseClicked(e ->
+                showPage(root, createComplexityPage()));
+
+        // ADD CARDS TO DASHBOARD
+
+        cards.add(recursionCard, 0, 0);
+        cards.add(dataCard, 1, 0);
+        cards.add(sortingCard, 0, 1);
+        cards.add(analysisCard, 1, 1);
 
         page.getChildren().addAll(
                 heading,
@@ -1681,6 +1706,2633 @@ public class Main extends Application {
 
         return page;
     }
+
+    // DATA STRUCTURES LAB MENU
+    private VBox createDataStructuresPage(BorderPane root) {
+
+        VBox page = new VBox(22);
+        page.setPadding(new Insets(35));
+        page.setStyle("-fx-background-color: " + LIGHT_GREY + ";");
+
+        Label heading = new Label("Data Structures Lab");
+        heading.setStyle(
+                "-fx-font-size: 28px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-text-fill: " + BURGUNDY + ";"
+        );
+
+        Label description = new Label(
+                "Explore, operate and visualise different data structures."
+        );
+        description.setWrapText(true);
+
+        GridPane modules = new GridPane();
+        modules.setHgap(20);
+        modules.setVgap(20);
+
+        modules.getColumnConstraints().addAll(
+                columnConstraint(),
+                columnConstraint()
+        );
+
+        String[] names = {
+                "Stack",
+                "Linear Queue",
+                "Circular Queue",
+                "Singly Linked List",
+                "Doubly Linked List",
+                "Balanced Brackets"
+        };
+
+        String[] descriptions = {
+                "Explore LIFO operations: Push, Pop and Peek.",
+                "Explore FIFO operations: Enqueue and Dequeue.",
+                "Explore circular queue operations.",
+                "Explore nodes connected in one direction.",
+                "Explore nodes connected in both directions.",
+                "Check whether brackets are balanced."
+        };
+
+        for (int i = 0; i < names.length; i++) {
+
+            final String moduleName = names[i];
+
+            VBox card = createCard(
+                    names[i],
+                    descriptions[i]
+            );
+
+            card.setOnMouseClicked(e ->
+                    showPage(root, createModuleLabPage(
+                            root, moduleName
+                    )));
+
+            modules.add(card, i % 2, i / 2);
+        }
+
+        page.getChildren().addAll(
+                heading,
+                description,
+                new Separator(),
+                createSectionTitle("Choose a Module"),
+                modules
+        );
+
+        return page;
+    }
+
+    // INDIVIDUAL MODULE PAGE
+    
+        private VBox createModuleLabPage(BorderPane root, String moduleName) {
+
+        VBox page = new VBox(20);
+        page.setPadding(new Insets(30));
+        page.setBackground(new Background(
+        new BackgroundFill(
+                javafx.scene.paint.Color.web(LIGHT_GREY),
+                CornerRadii.EMPTY,
+                Insets.EMPTY
+        )
+));
+        Button backButton = createSecondaryButton("← Back to Data Structures");
+        backButton.setOnAction(e ->
+                showPage(root, createDataStructuresPage(root)));
+
+        HBox topBar = new HBox(backButton);
+        topBar.setAlignment(Pos.CENTER_RIGHT);
+
+        Label heading = new Label(moduleName + " Lab");
+        heading.setStyle("-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: " + BURGUNDY + ";");
+
+        page.getChildren().addAll(topBar, heading);
+
+        switch (moduleName) {
+
+    case "Stack":
+        page.getChildren().add(createStackInterface());
+        break;
+
+    case "Linear Queue":
+        page.getChildren().add(createLinearQueueInterface());
+        break;
+
+    case "Circular Queue":
+        page.getChildren().add(createCircularQueueInterface());
+        break;
+
+    case "Singly Linked List":
+        page.getChildren().add(createSinglyLinkedListInterface());
+        break;
+
+    case "Doubly Linked List":
+        page.getChildren().add(createDoublyLinkedListInterface());
+        break;
+
+    case "Balanced Brackets":
+        page.getChildren().add(createBalancedBracketsInterface());
+        break;    
+
+    default:
+        VBox content = createInfoCard(
+                "Module Information",
+                new Label("Welcome to the " + moduleName + " module."),
+                new Label("This interactive lab will be implemented next.")
+        );
+
+        page.getChildren().add(content);
+}
+
+        return page;
+        }
+
+
+private VBox createStackInterface() {
+
+    VBox mainContent = new VBox(20);
+
+    ArrayList<Integer> stack = new ArrayList<>();
+    int capacity = 10;
+    int[] operationCount = {0};
+
+    // INPUT
+    Label inputLabel = new Label("Enter an integer:");
+    inputLabel.setStyle("-fx-font-weight: bold;");
+
+    TextField inputField = new TextField();
+    inputField.setPromptText("Enter a number...");
+    inputField.setMaxWidth(250);
+
+    // BUTTONS
+    Button pushButton = createActionButton("Push");
+    Button popButton = createSecondaryButton("Pop");
+    Button peekButton = createSecondaryButton("Peek");
+    Button displayButton = createSecondaryButton("Display");
+    Button clearButton = createSecondaryButton("Clear");
+
+    HBox buttonRow = new HBox(10);
+    buttonRow.setAlignment(Pos.CENTER_LEFT);
+    buttonRow.getChildren().addAll(
+            pushButton, popButton, peekButton,
+            displayButton, clearButton
+    );
+
+    // STATUS
+    Label statusLabel = new Label("Ready to perform stack operations.");
+    statusLabel.setWrapText(true);
+    statusLabel.setStyle("-fx-text-fill: " + BURGUNDY + ";");
+
+    // METRICS
+    Label operationLabel = new Label("Operations: 0");
+    Label timeLabel = new Label("Execution time: 0.000 ms");
+
+    HBox metrics = new HBox(25);
+    metrics.getChildren().addAll(operationLabel, timeLabel);
+
+    // OUTPUT
+    TextArea outputArea = new TextArea();
+    outputArea.setEditable(false);
+    outputArea.setWrapText(true);
+    outputArea.setPrefRowCount(5);
+    outputArea.setPromptText("Operation results will appear here...");
+
+    // VISUAL STACK
+    VBox stackVisual = new VBox(8);
+    stackVisual.setAlignment(Pos.BOTTOM_CENTER);
+    stackVisual.setPadding(new Insets(15));
+
+    Label stackTitle = new Label("STACK VISUALIZATION");
+    stackTitle.setStyle(
+            "-fx-font-size: 16px;" +
+            "-fx-font-weight: bold;" +
+            "-fx-text-fill: " + BURGUNDY + ";"
+    );
+
+    Label capacityLabel = new Label("Capacity: " + capacity);
+
+    VBox stackContainer = new VBox(10);
+    stackContainer.setAlignment(Pos.CENTER);
+    stackContainer.setPadding(new Insets(15));
+    stackContainer.setMinWidth(220);
+    stackContainer.setStyle(
+            "-fx-background-color: white;" +
+            "-fx-border-color: #D6D6D6;" +
+            "-fx-border-radius: 8;" +
+            "-fx-background-radius: 8;"
+    );
+
+    stackContainer.getChildren().add(stackVisual);
+
+    // REFRESH STACK VISUAL
+    Runnable refreshStack = () -> {
+
+        stackVisual.getChildren().clear();
+
+        if (stack.isEmpty()) {
+
+            Label emptyLabel = new Label("Stack is empty");
+            emptyLabel.setStyle("-fx-text-fill: #888888;");
+
+            stackVisual.getChildren().add(emptyLabel);
+
+        } else {
+
+            for (int i = stack.size() - 1; i >= 0; i--) {
+
+                Label element = new Label(String.valueOf(stack.get(i)));
+
+                element.setAlignment(Pos.CENTER);
+                element.setPrefSize(160, 40);
+
+                element.setStyle(
+                        "-fx-background-color: " + BURGUNDY + ";" +
+                        "-fx-text-fill: white;" +
+                        "-fx-font-size: 16px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-background-radius: 6;"
+                );
+
+                stackVisual.getChildren().add(element);
+
+                if (i == stack.size() - 1) {
+
+                    Label topLabel = new Label("↑ TOP");
+
+                    topLabel.setStyle(
+                            "-fx-font-weight: bold;" +
+                            "-fx-text-fill: " + BURGUNDY + ";"
+                    );
+
+                    stackVisual.getChildren().add(0, topLabel);
+                }
+            }
+        }
+
+        capacityLabel.setText(
+                "Elements: " + stack.size() + " / " + capacity
+        );
+    };
+
+    // UPDATE METRICS
+    java.util.function.LongConsumer updateMetrics = startTime -> {
+
+        operationCount[0]++;
+
+        double elapsed =
+                (System.nanoTime() - startTime) / 1_000_000.0;
+
+        operationLabel.setText(
+                "Operations: " + operationCount[0]
+        );
+
+        timeLabel.setText(
+                String.format("Execution time: %.6f ms", elapsed)
+        );
+    };
+
+    // PUSH
+    pushButton.setOnAction(e -> {
+
+        long startTime = System.nanoTime();
+
+        try {
+
+            int value = Integer.parseInt(inputField.getText().trim());
+
+            if (stack.size() >= capacity) {
+
+                statusLabel.setText(
+                        "Stack Overflow! The stack is full."
+                );
+
+                outputArea.appendText(
+                        "ERROR: Cannot push " + value +
+                        ". Stack capacity is " + capacity + ".\n"
+                );
+
+            } else {
+
+                stack.add(value);
+
+                statusLabel.setText(
+                        "Successfully pushed " + value + "."
+                );
+
+                outputArea.appendText(
+                        "PUSH: " + value + "\n"
+                );
+
+                refreshStack.run();
+            }
+
+        } catch (NumberFormatException ex) {
+
+            statusLabel.setText(
+                    "Invalid input! Please enter an integer."
+            );
+
+        }
+
+        updateMetrics.accept(startTime);
+    });
+
+    // POP
+    popButton.setOnAction(e -> {
+
+        long startTime = System.nanoTime();
+
+        if (stack.isEmpty()) {
+
+            statusLabel.setText(
+                    "Stack Underflow! There are no elements to pop."
+            );
+
+            outputArea.appendText(
+                    "ERROR: Cannot pop from an empty stack.\n"
+            );
+
+        } else {
+
+            int removed = stack.remove(stack.size() - 1);
+
+            statusLabel.setText(
+                    "Successfully popped " + removed + "."
+            );
+
+            outputArea.appendText(
+                    "POP: Removed " + removed + "\n"
+            );
+
+            refreshStack.run();
+        }
+
+        updateMetrics.accept(startTime);
+    });
+
+    // PEEK
+    peekButton.setOnAction(e -> {
+
+        long startTime = System.nanoTime();
+
+        if (stack.isEmpty()) {
+
+            statusLabel.setText(
+                    "Stack is empty. Nothing to peek."
+            );
+
+            outputArea.appendText(
+                    "ERROR: Cannot peek into an empty stack.\n"
+            );
+
+        } else {
+
+            int top = stack.get(stack.size() - 1);
+
+            statusLabel.setText(
+                    "Top element is " + top + "."
+            );
+
+            outputArea.appendText(
+                    "PEEK: " + top + "\n"
+            );
+        }
+
+        updateMetrics.accept(startTime);
+    });
+
+    // DISPLAY
+    displayButton.setOnAction(e -> {
+
+        long startTime = System.nanoTime();
+
+        if (stack.isEmpty()) {
+
+            outputArea.appendText(
+                    "Stack is empty.\n"
+            );
+
+        } else {
+
+            StringBuilder result = new StringBuilder();
+
+            result.append("Stack (TOP → BOTTOM): ");
+
+            for (int i = stack.size() - 1; i >= 0; i--) {
+
+                result.append(stack.get(i));
+
+                if (i > 0) {
+                    result.append(" → ");
+                }
+            }
+
+            result.append("\n");
+
+            outputArea.appendText(result.toString());
+
+            statusLabel.setText(
+                    "Stack displayed successfully."
+            );
+        }
+
+        updateMetrics.accept(startTime);
+    });
+
+    // CLEAR
+    clearButton.setOnAction(e -> {
+
+        long startTime = System.nanoTime();
+
+        stack.clear();
+
+        refreshStack.run();
+
+        statusLabel.setText(
+                "Stack cleared successfully."
+        );
+
+        outputArea.appendText(
+                "CLEAR: Stack emptied.\n"
+        );
+
+        updateMetrics.accept(startTime);
+    });
+
+    // LAYOUT
+    VBox controls = new VBox(15);
+    controls.setPadding(new Insets(20));
+
+    controls.getChildren().addAll(
+            inputLabel,
+            inputField,
+            buttonRow,
+            statusLabel,
+            metrics,
+            new Label("Operation History"),
+            outputArea
+    );
+
+    controls.setStyle(
+            "-fx-background-color: white;" +
+            "-fx-background-radius: 8;"
+    );
+
+    HBox workspace = new HBox(20);
+    workspace.setAlignment(Pos.TOP_CENTER);
+
+    HBox.setHgrow(controls, Priority.ALWAYS);
+
+    workspace.getChildren().addAll(
+            controls,
+            stackContainer
+    );
+
+    mainContent.getChildren().addAll(
+            workspace,
+            capacityLabel,
+            stackTitle
+    );
+
+    refreshStack.run();
+
+    return mainContent;
+}
+
+    
+private VBox createLinearQueueInterface() {
+
+    VBox mainContent = new VBox(20);
+
+    ArrayList<Integer> queue = new ArrayList<>();
+    int capacity = 10;
+    int[] operationCount = {0};
+
+    Label inputLabel = new Label("Enter an integer:");
+
+    TextField inputField = new TextField();
+    inputField.setPromptText("Enter a number...");
+    inputField.setMaxWidth(250);
+
+    Button enqueueButton = createActionButton("Enqueue");
+    Button dequeueButton = createSecondaryButton("Dequeue");
+    Button frontButton = createSecondaryButton("Front");
+    Button rearButton = createSecondaryButton("Rear");
+    Button displayButton = createSecondaryButton("Display");
+    Button clearButton = createSecondaryButton("Clear");
+
+    HBox buttons = new HBox(10);
+buttons.setSpacing(8);
+buttons.setAlignment(Pos.CENTER_LEFT);
+
+buttons.getChildren().addAll(
+        enqueueButton, dequeueButton,
+        frontButton, rearButton,
+        displayButton, clearButton
+);      
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+
+    Label statusLabel = new Label("Ready to perform queue operations.");
+    statusLabel.setWrapText(true);
+    statusLabel.setStyle("-fx-text-fill: " + BURGUNDY + ";");
+
+    Label operationLabel = new Label("Operations: 0");
+    Label timeLabel = new Label("Execution time: 0.000 ms");
+
+    HBox metrics = new HBox(25);
+    metrics.getChildren().addAll(operationLabel, timeLabel);
+
+    TextArea outputArea = new TextArea();
+    outputArea.setEditable(false);
+    outputArea.setWrapText(true);
+    outputArea.setPrefRowCount(5);
+    outputArea.setPromptText("Operation history...");
+
+    VBox queueVisual = new VBox(8);
+    queueVisual.setAlignment(Pos.CENTER);
+    queueVisual.setPadding(new Insets(15));
+
+    VBox queueContainer = new VBox(10);
+    queueContainer.setAlignment(Pos.CENTER);
+    queueContainer.setPadding(new Insets(15));
+    queueContainer.setMinWidth(250);
+    queueContainer.setStyle(
+            "-fx-background-color: white;" +
+            "-fx-border-color: #D6D6D6;" +
+            "-fx-border-radius: 8;" +
+            "-fx-background-radius: 8;"
+    );
+
+    Label queueTitle = new Label("QUEUE VISUALIZATION");
+    queueTitle.setStyle(
+            "-fx-font-size: 16px;" +
+            "-fx-font-weight: bold;" +
+            "-fx-text-fill: " + BURGUNDY + ";"
+    );
+
+    Label capacityLabel = new Label("Elements: 0 / " + capacity);
+
+    queueContainer.getChildren().addAll(queueTitle, queueVisual);
+
+    Runnable refreshQueue = () -> {
+
+        queueVisual.getChildren().clear();
+
+        if (queue.isEmpty()) {
+
+            Label empty = new Label("Queue is empty");
+            empty.setStyle("-fx-text-fill: #888888;");
+            queueVisual.getChildren().add(empty);
+
+        } else {
+
+            Label frontLabel = new Label("FRONT ↓");
+            frontLabel.setStyle(
+                    "-fx-font-weight: bold;" +
+                    "-fx-text-fill: " + BURGUNDY + ";"
+            );
+
+            queueVisual.getChildren().add(frontLabel);
+
+            for (int value : queue) {
+
+                Label element = new Label(String.valueOf(value));
+
+                element.setAlignment(Pos.CENTER);
+                element.setPrefSize(160, 40);
+
+                element.setStyle(
+                        "-fx-background-color: " + BURGUNDY + ";" +
+                        "-fx-text-fill: white;" +
+                        "-fx-font-size: 16px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-background-radius: 6;"
+                );
+
+                queueVisual.getChildren().add(element);
+            }
+
+            Label rearLabel = new Label("↑ REAR");
+            rearLabel.setStyle(
+                    "-fx-font-weight: bold;" +
+                    "-fx-text-fill: " + BURGUNDY + ";"
+            );
+
+            queueVisual.getChildren().add(rearLabel);
+        }
+
+        capacityLabel.setText(
+                "Elements: " + queue.size() + " / " + capacity
+        );
+    };
+
+    java.util.function.LongConsumer updateMetrics = startTime -> {
+
+        operationCount[0]++;
+
+        double elapsed =
+                (System.nanoTime() - startTime) / 1_000_000.0;
+
+        operationLabel.setText(
+                "Operations: " + operationCount[0]
+        );
+
+        timeLabel.setText(
+                String.format("Execution time: %.6f ms", elapsed)
+        );
+    };
+
+    // ENQUEUE
+    enqueueButton.setOnAction(e -> {
+
+        long startTime = System.nanoTime();
+
+        try {
+
+            int value = Integer.parseInt(inputField.getText().trim());
+
+            if (queue.size() >= capacity) {
+
+                statusLabel.setText(
+                        "Queue Overflow! The queue is full."
+                );
+
+                outputArea.appendText(
+                        "ERROR: Cannot enqueue " + value + ".\n"
+                );
+
+            } else {
+
+                queue.add(value);
+
+                statusLabel.setText(
+                        "Successfully enqueued " + value + "."
+                );
+
+                outputArea.appendText(
+                        "ENQUEUE: " + value + "\n"
+                );
+
+                refreshQueue.run();
+            }
+
+        } catch (NumberFormatException ex) {
+
+            statusLabel.setText(
+                    "Invalid input! Enter an integer."
+            );
+        }
+
+        updateMetrics.accept(startTime);
+    });
+
+    // DEQUEUE
+    dequeueButton.setOnAction(e -> {
+
+        long startTime = System.nanoTime();
+
+        if (queue.isEmpty()) {
+
+            statusLabel.setText(
+                    "Queue Underflow! The queue is empty."
+            );
+
+            outputArea.appendText(
+                    "ERROR: Cannot dequeue from an empty queue.\n"
+            );
+
+        } else {
+
+            int removed = queue.remove(0);
+
+            statusLabel.setText(
+                    "Successfully dequeued " + removed + "."
+            );
+
+            outputArea.appendText(
+                    "DEQUEUE: Removed " + removed + "\n"
+            );
+
+            refreshQueue.run();
+        }
+
+        updateMetrics.accept(startTime);
+    });
+
+    // FRONT
+    frontButton.setOnAction(e -> {
+
+        long startTime = System.nanoTime();
+
+        if (queue.isEmpty()) {
+
+            statusLabel.setText("Queue is empty.");
+
+        } else {
+
+            int value = queue.get(0);
+
+            statusLabel.setText("Front element: " + value);
+
+            outputArea.appendText("FRONT: " + value + "\n");
+        }
+
+        updateMetrics.accept(startTime);
+    });
+
+    // REAR
+    rearButton.setOnAction(e -> {
+
+        long startTime = System.nanoTime();
+
+        if (queue.isEmpty()) {
+
+            statusLabel.setText("Queue is empty.");
+
+        } else {
+
+            int value = queue.get(queue.size() - 1);
+
+            statusLabel.setText("Rear element: " + value);
+
+            outputArea.appendText("REAR: " + value + "\n");
+        }
+
+        updateMetrics.accept(startTime);
+    });
+
+    // DISPLAY
+    displayButton.setOnAction(e -> {
+
+        long startTime = System.nanoTime();
+
+        if (queue.isEmpty()) {
+
+            outputArea.appendText("Queue is empty.\n");
+
+        } else {
+
+            outputArea.appendText(
+                    "QUEUE (FRONT → REAR): " + queue + "\n"
+            );
+
+            statusLabel.setText("Queue displayed successfully.");
+        }
+
+        updateMetrics.accept(startTime);
+    });
+
+    // CLEAR
+    clearButton.setOnAction(e -> {
+
+        long startTime = System.nanoTime();
+
+        queue.clear();
+
+        refreshQueue.run();
+
+        statusLabel.setText("Queue cleared successfully.");
+
+        outputArea.appendText("CLEAR: Queue emptied.\n");
+
+        updateMetrics.accept(startTime);
+    });
+
+    VBox controls = new VBox(15);
+    controls.setPadding(new Insets(20));
+
+    controls.getChildren().addAll(
+            inputLabel,
+            inputField,
+            buttons,
+            statusLabel,
+            metrics,
+            new Label("Operation History"),
+            outputArea
+    );
+
+    controls.setStyle(
+            "-fx-background-color: white;" +
+            "-fx-background-radius: 8;"
+    );
+
+    HBox workspace = new HBox(20);
+    workspace.setAlignment(Pos.TOP_CENTER);
+    HBox.setHgrow(controls, Priority.ALWAYS);
+
+    workspace.getChildren().addAll(
+            controls,
+            queueContainer
+    );
+
+    mainContent.getChildren().addAll(
+            workspace,
+            capacityLabel
+    );
+
+    refreshQueue.run();
+
+    return mainContent;
+}
+
+    
+private VBox createCircularQueueInterface() {
+
+    VBox mainContent = new VBox(20);
+    mainContent.setPadding(new Insets(10));
+
+    final int capacity = 10;
+
+    int[] queue = new int[capacity];
+    int[] front = {0};
+    int[] rear = {-1};
+    int[] size = {0};
+    int[] operationCount = {0};
+
+    // INPUT
+    Label inputLabel = new Label("Enter an integer:");
+
+    TextField inputField = new TextField();
+    inputField.setPromptText("Enter a number...");
+    inputField.setMaxWidth(250);
+
+    // BUTTONS
+    Button enqueueButton = createActionButton("Enqueue");
+    Button dequeueButton = createSecondaryButton("Dequeue");
+    Button frontButton = createSecondaryButton("Front");
+    Button rearButton = createSecondaryButton("Rear");
+    Button displayButton = createSecondaryButton("Display");
+    Button clearButton = createSecondaryButton("Clear");
+
+    HBox firstRow = new HBox(10);
+    firstRow.setAlignment(Pos.CENTER_LEFT);
+    firstRow.getChildren().addAll(enqueueButton, dequeueButton, frontButton);
+
+    HBox secondRow = new HBox(10);
+    secondRow.setAlignment(Pos.CENTER_LEFT);
+    secondRow.getChildren().addAll(rearButton, displayButton, clearButton);
+
+    Label statusLabel = new Label("Ready to perform circular queue operations.");
+    statusLabel.setWrapText(true);
+    statusLabel.setStyle("-fx-text-fill: " + BURGUNDY + ";");
+
+    Label operationLabel = new Label("Operations: 0");
+    Label timeLabel = new Label("Execution time: 0.000 ms");
+
+    HBox metrics = new HBox(25);
+    metrics.getChildren().addAll(operationLabel, timeLabel);
+
+    TextArea outputArea = new TextArea();
+    outputArea.setEditable(false);
+    outputArea.setWrapText(true);
+    outputArea.setPrefRowCount(5);
+    outputArea.setPromptText("Operation history...");
+
+    // CIRCULAR QUEUE VISUALIZATION
+    Label visualTitle = new Label("CIRCULAR QUEUE VISUALIZATION");
+
+    visualTitle.setStyle(
+            "-fx-font-size: 16px;" +
+            "-fx-font-weight: bold;" +
+            "-fx-text-fill: " + BURGUNDY + ";"
+    );
+
+    HBox queueVisual = new HBox(8);
+    queueVisual.setAlignment(Pos.CENTER);
+    queueVisual.setPadding(new Insets(15));
+
+    queueVisual.setStyle(
+            "-fx-background-color: white;" +
+            "-fx-background-radius: 8;"
+    );
+
+    Label positionLabel = new Label("Elements: 0 / " + capacity);
+
+    Label pointerLabel = new Label("Front: -     Rear: -");
+
+    // REFRESH VISUALIZATION
+    Runnable refreshQueue = () -> {
+
+        queueVisual.getChildren().clear();
+
+        for (int i = 0; i < capacity; i++) {
+
+            VBox slot = new VBox(5);
+            slot.setAlignment(Pos.CENTER);
+            slot.setPadding(new Insets(8));
+            slot.setMinWidth(55);
+            slot.setPrefWidth(60);
+
+            Label indexLabel = new Label("Index " + i);
+
+            indexLabel.setStyle(
+                    "-fx-font-size: 10px;" +
+                    "-fx-text-fill: #777777;"
+            );
+
+            Label valueLabel = new Label(
+                    size[0] > 0 &&
+                    ((i - front[0] + capacity) % capacity) < size[0]
+                            ? String.valueOf(queue[i])
+                            : "-"
+            );
+
+            valueLabel.setStyle(
+                    "-fx-font-size: 15px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-text-fill: " + BURGUNDY + ";"
+            );
+
+            Label pointer = new Label("");
+
+            if (size[0] > 0 && i == front[0] && i == rear[0]) {
+                pointer.setText("F/R");
+            } else if (size[0] > 0 && i == front[0]) {
+                pointer.setText("FRONT");
+            } else if (size[0] > 0 && i == rear[0]) {
+                pointer.setText("REAR");
+            }
+
+            pointer.setStyle(
+                    "-fx-font-size: 9px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-text-fill: " + BURGUNDY + ";"
+            );
+
+            slot.getChildren().addAll(indexLabel, valueLabel, pointer);
+
+            slot.setStyle(
+                    "-fx-background-color: " +
+                    (size[0] > 0 &&
+                    ((i - front[0] + capacity) % capacity) < size[0]
+                            ? "#F0DDDD" : "#F4F4F4") +
+                    ";" +
+                    "-fx-border-color: " + BURGUNDY + ";" +
+                    "-fx-border-radius: 5;" +
+                    "-fx-background-radius: 5;"
+            );
+
+            queueVisual.getChildren().add(slot);
+        }
+
+        positionLabel.setText(
+                "Elements: " + size[0] + " / " + capacity
+        );
+
+        if (size[0] == 0) {
+            pointerLabel.setText("Front: -     Rear: -");
+        } else {
+            pointerLabel.setText(
+                    "Front: " + front[0] + "     Rear: " + rear[0]
+            );
+        }
+    };
+
+    // UPDATE METRICS
+    java.util.function.LongConsumer updateMetrics = startTime -> {
+
+        operationCount[0]++;
+
+        double elapsed =
+                (System.nanoTime() - startTime) / 1_000_000.0;
+
+        operationLabel.setText(
+                "Operations: " + operationCount[0]
+        );
+
+        timeLabel.setText(
+                String.format("Execution time: %.6f ms", elapsed)
+        );
+    };
+
+    // ENQUEUE
+    enqueueButton.setOnAction(e -> {
+
+        long startTime = System.nanoTime();
+
+        try {
+
+            int value = Integer.parseInt(inputField.getText().trim());
+
+            if (size[0] == capacity) {
+
+                statusLabel.setText(
+                        "Queue Overflow! The circular queue is full."
+                );
+
+                outputArea.appendText(
+                        "ERROR: Cannot enqueue " + value + ". Queue is full.\n"
+                );
+
+            } else {
+
+                rear[0] = (rear[0] + 1) % capacity;
+
+                queue[rear[0]] = value;
+
+                if (size[0] == 0) {
+                    front[0] = rear[0];
+                }
+
+                size[0]++;
+
+                statusLabel.setText(
+                        "Successfully enqueued " + value + "."
+                );
+
+                outputArea.appendText(
+                        "ENQUEUE: " + value +
+                        " inserted at index " + rear[0] + "\n"
+                );
+
+                refreshQueue.run();
+            }
+
+        } catch (NumberFormatException ex) {
+
+            statusLabel.setText(
+                    "Invalid input! Please enter an integer."
+            );
+        }
+
+        updateMetrics.accept(startTime);
+    });
+
+    // DEQUEUE
+    dequeueButton.setOnAction(e -> {
+
+        long startTime = System.nanoTime();
+
+        if (size[0] == 0) {
+
+            statusLabel.setText(
+                    "Queue Underflow! The circular queue is empty."
+            );
+
+            outputArea.appendText(
+                    "ERROR: Cannot dequeue from an empty queue.\n"
+            );
+
+        } else {
+
+            int removed = queue[front[0]];
+
+            int removedIndex = front[0];
+
+            front[0] = (front[0] + 1) % capacity;
+
+            size[0]--;
+
+            if (size[0] == 0) {
+                front[0] = 0;
+                rear[0] = -1;
+            }
+
+            statusLabel.setText(
+                    "Successfully dequeued " + removed + "."
+            );
+
+            outputArea.appendText(
+                    "DEQUEUE: Removed " + removed +
+                    " from index " + removedIndex + "\n"
+            );
+
+            refreshQueue.run();
+        }
+
+        updateMetrics.accept(startTime);
+    });
+
+    // FRONT
+    frontButton.setOnAction(e -> {
+
+        long startTime = System.nanoTime();
+
+        if (size[0] == 0) {
+
+            statusLabel.setText("Circular queue is empty.");
+
+        } else {
+
+            statusLabel.setText(
+                    "Front element: " + queue[front[0]]
+            );
+
+            outputArea.appendText(
+                    "FRONT: " + queue[front[0]] + "\n"
+            );
+        }
+
+        updateMetrics.accept(startTime);
+    });
+
+    // REAR
+    rearButton.setOnAction(e -> {
+
+        long startTime = System.nanoTime();
+
+        if (size[0] == 0) {
+
+            statusLabel.setText("Circular queue is empty.");
+
+        } else {
+
+            statusLabel.setText(
+                    "Rear element: " + queue[rear[0]]
+            );
+
+            outputArea.appendText(
+                    "REAR: " + queue[rear[0]] + "\n"
+            );
+        }
+
+        updateMetrics.accept(startTime);
+    });
+
+    // DISPLAY
+    displayButton.setOnAction(e -> {
+
+        long startTime = System.nanoTime();
+
+        if (size[0] == 0) {
+
+            outputArea.appendText("Circular queue is empty.\n");
+
+        } else {
+
+            StringBuilder result = new StringBuilder();
+
+            result.append("QUEUE (FRONT → REAR): ");
+
+            for (int i = 0; i < size[0]; i++) {
+
+                int index = (front[0] + i) % capacity;
+
+                result.append(queue[index]);
+
+                if (i < size[0] - 1) {
+                    result.append(" → ");
+                }
+            }
+
+            outputArea.appendText(result + "\n");
+
+            statusLabel.setText(
+                    "Circular queue displayed successfully."
+            );
+        }
+
+        updateMetrics.accept(startTime);
+    });
+
+    // CLEAR
+    clearButton.setOnAction(e -> {
+
+        long startTime = System.nanoTime();
+
+        size[0] = 0;
+        front[0] = 0;
+        rear[0] = -1;
+
+        refreshQueue.run();
+
+        statusLabel.setText(
+                "Circular queue cleared successfully."
+        );
+
+        outputArea.appendText("CLEAR: Circular queue emptied.\n");
+
+        updateMetrics.accept(startTime);
+    });
+
+    // CONTROLS
+    VBox controls = new VBox(15);
+    controls.setPadding(new Insets(20));
+
+    controls.getChildren().addAll(
+            inputLabel,
+            inputField,
+            firstRow,
+            secondRow,
+            statusLabel,
+            metrics,
+            new Label("Operation History"),
+            outputArea
+    );
+
+    controls.setStyle(
+            "-fx-background-color: white;" +
+            "-fx-background-radius: 8;"
+    );
+
+    VBox visualization = new VBox(12);
+
+    visualization.setPadding(new Insets(15));
+
+    visualization.getChildren().addAll(
+            visualTitle,
+            queueVisual,
+            positionLabel,
+            pointerLabel
+    );
+
+    visualization.setStyle(
+            "-fx-background-color: white;" +
+            "-fx-background-radius: 8;"
+    );
+
+    ScrollPane visualScroll = new ScrollPane(visualization);
+    visualScroll.setFitToWidth(true);
+    visualScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+    visualScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+    visualScroll.setPrefHeight(190);
+
+    mainContent.getChildren().addAll(
+            controls,
+            visualScroll
+    );
+
+    refreshQueue.run();
+
+    return mainContent;
+}
+
+   
+    
+private VBox createSinglyLinkedListInterface() {
+
+    VBox mainContent = new VBox(20);
+    mainContent.setPadding(new Insets(10));
+
+    // NODE STRUCTURE
+    class Node {
+        int data;
+        Node next;
+
+        Node(int data) {
+            this.data = data;
+            this.next = null;
+        }
+    }
+
+    Node[] head = {null};
+    int[] operationCount = {0};
+
+    // INPUT
+    Label inputLabel = new Label("Enter an integer:");
+
+    TextField inputField = new TextField();
+    inputField.setPromptText("Enter a number...");
+    inputField.setMaxWidth(250);
+
+    // BUTTONS
+    Button insertButton = createActionButton("Insert");
+    Button deleteButton = createSecondaryButton("Delete");
+    Button searchButton = createSecondaryButton("Search");
+    Button traverseButton = createSecondaryButton("Traverse");
+    Button clearButton = createSecondaryButton("Clear");
+
+    HBox firstRow = new HBox(10);
+    firstRow.setAlignment(Pos.CENTER_LEFT);
+    firstRow.getChildren().addAll(
+            insertButton, deleteButton, searchButton
+    );
+
+    HBox secondRow = new HBox(10);
+    secondRow.setAlignment(Pos.CENTER_LEFT);
+    secondRow.getChildren().addAll(
+            traverseButton, clearButton
+    );
+
+    // STATUS
+    Label statusLabel = new Label(
+            "Ready to perform linked list operations."
+    );
+
+    statusLabel.setWrapText(true);
+    statusLabel.setStyle("-fx-text-fill: " + BURGUNDY + ";");
+
+    // METRICS
+    Label operationLabel = new Label("Operations: 0");
+    Label timeLabel = new Label("Execution time: 0.000 ms");
+
+    HBox metrics = new HBox(25);
+    metrics.getChildren().addAll(operationLabel, timeLabel);
+
+    // HISTORY
+    TextArea outputArea = new TextArea();
+    outputArea.setEditable(false);
+    outputArea.setWrapText(true);
+    outputArea.setPrefRowCount(5);
+    outputArea.setPromptText("Operation history...");
+
+    // VISUALIZATION
+    Label visualTitle = new Label("SINGLY LINKED LIST VISUALIZATION");
+
+    visualTitle.setStyle(
+            "-fx-font-size: 16px;" +
+            "-fx-font-weight: bold;" +
+            "-fx-text-fill: " + BURGUNDY + ";"
+    );
+
+    HBox listVisual = new HBox(8);
+    listVisual.setAlignment(Pos.CENTER_LEFT);
+    listVisual.setPadding(new Insets(15));
+
+    Label sizeLabel = new Label("Number of nodes: 0");
+
+    ScrollPane visualScroll = new ScrollPane(listVisual);
+    visualScroll.setFitToHeight(true);
+    visualScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+    visualScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+    visualScroll.setPrefHeight(130);
+    visualScroll.setStyle("-fx-background: white;");
+
+    // REFRESH VISUALIZATION
+    Runnable refreshList = () -> {
+
+        listVisual.getChildren().clear();
+
+        if (head[0] == null) {
+
+            Label emptyLabel = new Label("HEAD → NULL (Empty list)");
+
+            emptyLabel.setStyle(
+                    "-fx-text-fill: #888888;" +
+                    "-fx-font-weight: bold;"
+            );
+
+            listVisual.getChildren().add(emptyLabel);
+
+        } else {
+
+            Node current = head[0];
+            int count = 0;
+
+            while (current != null) {
+
+                VBox nodeBox = new VBox(5);
+                nodeBox.setAlignment(Pos.CENTER);
+                nodeBox.setPadding(new Insets(8));
+                nodeBox.setMinWidth(75);
+
+                Label nodeTitle = new Label(
+                        count == 0 ? "HEAD" : "NODE"
+                );
+
+                nodeTitle.setStyle(
+                        "-fx-font-size: 10px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: " + BURGUNDY + ";"
+                );
+
+                Label dataLabel = new Label(
+                        String.valueOf(current.data)
+                );
+
+                dataLabel.setStyle(
+                        "-fx-font-size: 16px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: white;"
+                );
+
+                Label nextLabel = new Label("NEXT →");
+
+                nextLabel.setStyle(
+                        "-fx-font-size: 10px;" +
+                        "-fx-text-fill: white;"
+                );
+
+                nodeBox.getChildren().addAll(
+                        nodeTitle, dataLabel, nextLabel
+                );
+
+                nodeBox.setStyle(
+                        "-fx-background-color: " + BURGUNDY + ";" +
+                        "-fx-background-radius: 6;"
+                );
+
+                listVisual.getChildren().add(nodeBox);
+
+                if (current.next != null) {
+
+                    Label arrow = new Label("→");
+
+                    arrow.setStyle(
+                            "-fx-font-size: 20px;" +
+                            "-fx-font-weight: bold;" +
+                            "-fx-text-fill: " + BURGUNDY + ";"
+                    );
+
+                    listVisual.getChildren().add(arrow);
+                }
+
+                current = current.next;
+                count++;
+            }
+
+            Label nullLabel = new Label("→ NULL");
+
+            nullLabel.setStyle(
+                    "-fx-font-weight: bold;" +
+                    "-fx-text-fill: " + BURGUNDY + ";"
+            );
+
+            listVisual.getChildren().add(nullLabel);
+        }
+
+        int count = 0;
+        Node current = head[0];
+
+        while (current != null) {
+            count++;
+            current = current.next;
+        }
+
+        sizeLabel.setText("Number of nodes: " + count);
+    };
+
+    // METRICS
+    java.util.function.LongConsumer updateMetrics = startTime -> {
+
+        operationCount[0]++;
+
+        double elapsed =
+                (System.nanoTime() - startTime) / 1_000_000.0;
+
+        operationLabel.setText(
+                "Operations: " + operationCount[0]
+        );
+
+        timeLabel.setText(
+                String.format("Execution time: %.6f ms", elapsed)
+        );
+    };
+
+    // INSERT AT END
+    insertButton.setOnAction(e -> {
+
+        long startTime = System.nanoTime();
+
+        try {
+
+            int value = Integer.parseInt(inputField.getText().trim());
+
+            Node newNode = new Node(value);
+
+            if (head[0] == null) {
+
+                head[0] = newNode;
+
+            } else {
+
+                Node current = head[0];
+
+                while (current.next != null) {
+                    current = current.next;
+                }
+
+                current.next = newNode;
+            }
+
+            statusLabel.setText(
+                    "Successfully inserted " + value + "."
+            );
+
+            outputArea.appendText(
+                    "INSERT: Added " + value + " at the end.\n"
+            );
+
+            refreshList.run();
+
+            inputField.clear();
+
+        } catch (NumberFormatException ex) {
+
+            statusLabel.setText(
+                    "Invalid input! Please enter an integer."
+            );
+        }
+
+        updateMetrics.accept(startTime);
+    });
+
+    // DELETE BY VALUE
+    deleteButton.setOnAction(e -> {
+
+        long startTime = System.nanoTime();
+
+        try {
+
+            int value = Integer.parseInt(inputField.getText().trim());
+
+            if (head[0] == null) {
+
+                statusLabel.setText(
+                        "Cannot delete. The linked list is empty."
+                );
+
+                outputArea.appendText(
+                        "ERROR: Cannot delete from an empty list.\n"
+                );
+
+            } else if (head[0].data == value) {
+
+                head[0] = head[0].next;
+
+                statusLabel.setText(
+                        "Successfully deleted " + value + "."
+                );
+
+                outputArea.appendText(
+                        "DELETE: Removed " + value + ".\n"
+                );
+
+                refreshList.run();
+
+            } else {
+
+                Node current = head[0];
+
+                while (current.next != null &&
+                        current.next.data != value) {
+
+                    current = current.next;
+                }
+
+                if (current.next == null) {
+
+                    statusLabel.setText(
+                            value + " does not exist in the list."
+                    );
+
+                    outputArea.appendText(
+                            "ERROR: " + value + " was not found.\n"
+                    );
+
+                } else {
+
+                    current.next = current.next.next;
+
+                    statusLabel.setText(
+                            "Successfully deleted " + value + "."
+                    );
+
+                    outputArea.appendText(
+                            "DELETE: Removed " + value + ".\n"
+                    );
+
+                    refreshList.run();
+                }
+            }
+
+        } catch (NumberFormatException ex) {
+
+            statusLabel.setText(
+                    "Invalid input! Please enter an integer."
+            );
+        }
+
+        updateMetrics.accept(startTime);
+    });
+
+    // SEARCH
+    searchButton.setOnAction(e -> {
+
+        long startTime = System.nanoTime();
+
+        try {
+
+            int value = Integer.parseInt(inputField.getText().trim());
+
+            Node current = head[0];
+            int position = 0;
+            boolean found = false;
+
+            while (current != null) {
+
+                if (current.data == value) {
+
+                    found = true;
+                    break;
+                }
+
+                current = current.next;
+                position++;
+            }
+
+            if (found) {
+
+                statusLabel.setText(
+                        value + " found at position " + position + "."
+                );
+
+                outputArea.appendText(
+                        "SEARCH: " + value +
+                        " found at position " + position + ".\n"
+                );
+
+            } else {
+
+                statusLabel.setText(
+                        value + " does not exist in the list."
+                );
+
+                outputArea.appendText(
+                        "SEARCH: " + value + " not found.\n"
+                );
+            }
+
+        } catch (NumberFormatException ex) {
+
+            statusLabel.setText(
+                    "Invalid input! Please enter an integer."
+            );
+        }
+
+        updateMetrics.accept(startTime);
+    });
+
+    // TRAVERSE
+    traverseButton.setOnAction(e -> {
+
+        long startTime = System.nanoTime();
+
+        if (head[0] == null) {
+
+            statusLabel.setText("The linked list is empty.");
+
+            outputArea.appendText(
+                    "TRAVERSE: Empty linked list.\n"
+            );
+
+        } else {
+
+            StringBuilder result = new StringBuilder();
+
+            result.append("HEAD → ");
+
+            Node current = head[0];
+
+            while (current != null) {
+
+                result.append(current.data);
+                result.append(" → ");
+
+                current = current.next;
+            }
+
+            result.append("NULL");
+
+            outputArea.appendText(
+                    "TRAVERSE: " + result + "\n"
+            );
+
+            statusLabel.setText(
+                    "Linked list traversed successfully."
+            );
+        }
+
+        updateMetrics.accept(startTime);
+    });
+
+    // CLEAR
+    clearButton.setOnAction(e -> {
+
+        long startTime = System.nanoTime();
+
+        head[0] = null;
+
+        refreshList.run();
+
+        statusLabel.setText(
+                "Linked list cleared successfully."
+        );
+
+        outputArea.appendText(
+                "CLEAR: Linked list emptied.\n"
+        );
+
+        updateMetrics.accept(startTime);
+    });
+
+    // CONTROLS
+    VBox controls = new VBox(15);
+    controls.setPadding(new Insets(20));
+
+    controls.getChildren().addAll(
+            inputLabel,
+            inputField,
+            firstRow,
+            secondRow,
+            statusLabel,
+            metrics,
+            new Label("Operation History"),
+            outputArea
+    );
+
+    controls.setStyle(
+            "-fx-background-color: white;" +
+            "-fx-background-radius: 8;"
+    );
+
+    VBox visualization = new VBox(12);
+    visualization.setPadding(new Insets(15));
+
+    visualization.getChildren().addAll(
+            visualTitle,
+            visualScroll,
+            sizeLabel
+    );
+
+    visualization.setStyle(
+            "-fx-background-color: white;" +
+            "-fx-background-radius: 8;"
+    );
+
+    mainContent.getChildren().addAll(
+            controls,
+            visualization
+    );
+
+    refreshList.run();
+
+    return mainContent;
+}
+
+    
+private VBox createDoublyLinkedListInterface() {
+
+    VBox mainContent = new VBox(20);
+    mainContent.setPadding(new Insets(10));
+
+    // NODE STRUCTURE
+    class Node {
+        int data;
+        Node previous;
+        Node next;
+
+        Node(int data) {
+            this.data = data;
+            this.previous = null;
+            this.next = null;
+        }
+    }
+
+    Node[] head = {null};
+    Node[] tail = {null};
+
+    int[] operationCount = {0};
+
+    // INPUT
+    Label inputLabel = new Label("Enter an integer:");
+
+    TextField inputField = new TextField();
+    inputField.setPromptText("Enter a number...");
+    inputField.setMaxWidth(250);
+
+    // BUTTONS
+    Button insertButton = createActionButton("Insert");
+    Button deleteButton = createSecondaryButton("Delete");
+    Button searchButton = createSecondaryButton("Search");
+    Button forwardButton = createSecondaryButton("Forward");
+    Button backwardButton = createSecondaryButton("Backward");
+    Button clearButton = createSecondaryButton("Clear");
+
+    HBox firstRow = new HBox(10);
+    firstRow.setAlignment(Pos.CENTER_LEFT);
+    firstRow.getChildren().addAll(
+            insertButton, deleteButton, searchButton
+    );
+
+    HBox secondRow = new HBox(10);
+    secondRow.setAlignment(Pos.CENTER_LEFT);
+    secondRow.getChildren().addAll(
+            forwardButton, backwardButton, clearButton
+    );
+
+    // STATUS
+    Label statusLabel = new Label(
+            "Ready to perform doubly linked list operations."
+    );
+
+    statusLabel.setWrapText(true);
+    statusLabel.setStyle("-fx-text-fill: " + BURGUNDY + ";");
+
+    // METRICS
+    Label operationLabel = new Label("Operations: 0");
+    Label timeLabel = new Label("Execution time: 0.000 ms");
+
+    HBox metrics = new HBox(25);
+    metrics.getChildren().addAll(operationLabel, timeLabel);
+
+    // HISTORY
+    TextArea outputArea = new TextArea();
+    outputArea.setEditable(false);
+    outputArea.setWrapText(true);
+    outputArea.setPrefRowCount(5);
+    outputArea.setPromptText("Operation history...");
+
+    // VISUALIZATION
+    Label visualTitle = new Label("DOUBLY LINKED LIST VISUALIZATION");
+
+    visualTitle.setStyle(
+            "-fx-font-size: 16px;" +
+            "-fx-font-weight: bold;" +
+            "-fx-text-fill: " + BURGUNDY + ";"
+    );
+
+    HBox listVisual = new HBox(8);
+    listVisual.setAlignment(Pos.CENTER_LEFT);
+    listVisual.setPadding(new Insets(15));
+
+    Label sizeLabel = new Label("Number of nodes: 0");
+
+    ScrollPane visualScroll = new ScrollPane(listVisual);
+    visualScroll.setFitToHeight(true);
+    visualScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+    visualScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+    visualScroll.setPrefHeight(150);
+
+    // REFRESH VISUALIZATION
+    Runnable refreshList = () -> {
+
+        listVisual.getChildren().clear();
+
+        if (head[0] == null) {
+
+            Label emptyLabel = new Label("HEAD → NULL (Empty list)");
+
+            emptyLabel.setStyle(
+                    "-fx-text-fill: #888888;" +
+                    "-fx-font-weight: bold;"
+            );
+
+            listVisual.getChildren().add(emptyLabel);
+
+        } else {
+
+            Node current = head[0];
+            int count = 0;
+
+            while (current != null) {
+
+                VBox nodeBox = new VBox(5);
+                nodeBox.setAlignment(Pos.CENTER);
+                nodeBox.setPadding(new Insets(8));
+                nodeBox.setMinWidth(90);
+
+                Label nodeTitle = new Label(
+                        count == 0 ? "HEAD" :
+                        current.next == null ? "TAIL" : "NODE"
+                );
+
+                nodeTitle.setStyle(
+                        "-fx-font-size: 10px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: white;"
+                );
+
+                Label previousLabel = new Label("PREV");
+
+                Label dataLabel = new Label(
+                        String.valueOf(current.data)
+                );
+
+                dataLabel.setStyle(
+                        "-fx-font-size: 16px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: white;"
+                );
+
+                Label nextLabel = new Label("NEXT");
+
+                previousLabel.setStyle(
+                        "-fx-font-size: 9px;" +
+                        "-fx-text-fill: white;"
+                );
+
+                nextLabel.setStyle(
+                        "-fx-font-size: 9px;" +
+                        "-fx-text-fill: white;"
+                );
+
+                nodeBox.getChildren().addAll(
+                        nodeTitle,
+                        previousLabel,
+                        dataLabel,
+                        nextLabel
+                );
+
+                nodeBox.setStyle(
+                        "-fx-background-color: " + BURGUNDY + ";" +
+                        "-fx-background-radius: 6;"
+                );
+
+                listVisual.getChildren().add(nodeBox);
+
+                if (current.next != null) {
+
+                    Label arrow = new Label("⇄");
+
+                    arrow.setStyle(
+                            "-fx-font-size: 20px;" +
+                            "-fx-font-weight: bold;" +
+                            "-fx-text-fill: " + BURGUNDY + ";"
+                    );
+
+                    listVisual.getChildren().add(arrow);
+                }
+
+                current = current.next;
+                count++;
+            }
+        }
+
+        int count = 0;
+        Node current = head[0];
+
+        while (current != null) {
+            count++;
+            current = current.next;
+        }
+
+        sizeLabel.setText("Number of nodes: " + count);
+    };
+
+    // METRICS
+    java.util.function.LongConsumer updateMetrics = startTime -> {
+
+        operationCount[0]++;
+
+        double elapsed =
+                (System.nanoTime() - startTime) / 1_000_000.0;
+
+        operationLabel.setText(
+                "Operations: " + operationCount[0]
+        );
+
+        timeLabel.setText(
+                String.format("Execution time: %.6f ms", elapsed)
+        );
+    };
+
+    // INSERT AT END
+    insertButton.setOnAction(e -> {
+
+        long startTime = System.nanoTime();
+
+        try {
+
+            int value = Integer.parseInt(inputField.getText().trim());
+
+            Node newNode = new Node(value);
+
+            if (head[0] == null) {
+
+                head[0] = newNode;
+                tail[0] = newNode;
+
+            } else {
+
+                tail[0].next = newNode;
+                newNode.previous = tail[0];
+
+                tail[0] = newNode;
+            }
+
+            statusLabel.setText(
+                    "Successfully inserted " + value + "."
+            );
+
+            outputArea.appendText(
+                    "INSERT: Added " + value + " at the end.\n"
+            );
+
+            refreshList.run();
+            inputField.clear();
+
+        } catch (NumberFormatException ex) {
+
+            statusLabel.setText(
+                    "Invalid input! Please enter an integer."
+            );
+        }
+
+        updateMetrics.accept(startTime);
+    });
+
+    // DELETE BY VALUE
+    deleteButton.setOnAction(e -> {
+
+        long startTime = System.nanoTime();
+
+        try {
+
+            int value = Integer.parseInt(inputField.getText().trim());
+
+            Node current = head[0];
+
+            while (current != null && current.data != value) {
+                current = current.next;
+            }
+
+            if (current == null) {
+
+                statusLabel.setText(
+                        value + " does not exist in the list."
+                );
+
+                outputArea.appendText(
+                        "DELETE: " + value + " not found.\n"
+                );
+
+            } else {
+
+                if (current.previous != null) {
+                    current.previous.next = current.next;
+                } else {
+                    head[0] = current.next;
+                }
+
+                if (current.next != null) {
+                    current.next.previous = current.previous;
+                } else {
+                    tail[0] = current.previous;
+                }
+
+                statusLabel.setText(
+                        "Successfully deleted " + value + "."
+                );
+
+                outputArea.appendText(
+                        "DELETE: Removed " + value + ".\n"
+                );
+
+                refreshList.run();
+            }
+
+        } catch (NumberFormatException ex) {
+
+            statusLabel.setText(
+                    "Invalid input! Please enter an integer."
+            );
+        }
+
+        updateMetrics.accept(startTime);
+    });
+
+    // SEARCH
+    searchButton.setOnAction(e -> {
+
+        long startTime = System.nanoTime();
+
+        try {
+
+            int value = Integer.parseInt(inputField.getText().trim());
+
+            Node current = head[0];
+            int position = 0;
+
+            while (current != null && current.data != value) {
+                current = current.next;
+                position++;
+            }
+
+            if (current != null) {
+
+                statusLabel.setText(
+                        value + " found at position " + position + "."
+                );
+
+                outputArea.appendText(
+                        "SEARCH: " + value +
+                        " found at position " + position + ".\n"
+                );
+
+            } else {
+
+                statusLabel.setText(
+                        value + " does not exist in the list."
+                );
+
+                outputArea.appendText(
+                        "SEARCH: " + value + " not found.\n"
+                );
+            }
+
+        } catch (NumberFormatException ex) {
+
+            statusLabel.setText(
+                    "Invalid input! Please enter an integer."
+            );
+        }
+
+        updateMetrics.accept(startTime);
+    });
+
+    // FORWARD TRAVERSAL
+    forwardButton.setOnAction(e -> {
+
+        long startTime = System.nanoTime();
+
+        if (head[0] == null) {
+
+            statusLabel.setText("The linked list is empty.");
+
+            outputArea.appendText(
+                    "FORWARD: Empty linked list.\n"
+            );
+
+        } else {
+
+            StringBuilder result = new StringBuilder("HEAD → ");
+
+            Node current = head[0];
+
+            while (current != null) {
+
+                result.append(current.data).append(" ⇄ ");
+                current = current.next;
+            }
+
+            result.append("NULL");
+
+            outputArea.appendText(
+                    "FORWARD: " + result + "\n"
+            );
+
+            statusLabel.setText(
+                    "Forward traversal completed."
+            );
+        }
+
+        updateMetrics.accept(startTime);
+    });
+
+    // BACKWARD TRAVERSAL
+    backwardButton.setOnAction(e -> {
+
+        long startTime = System.nanoTime();
+
+        if (tail[0] == null) {
+
+            statusLabel.setText("The linked list is empty.");
+
+            outputArea.appendText(
+                    "BACKWARD: Empty linked list.\n"
+            );
+
+        } else {
+
+            StringBuilder result = new StringBuilder("TAIL → ");
+
+            Node current = tail[0];
+
+            while (current != null) {
+
+                result.append(current.data).append(" ⇄ ");
+                current = current.previous;
+            }
+
+            result.append("NULL");
+
+            outputArea.appendText(
+                    "BACKWARD: " + result + "\n"
+            );
+
+            statusLabel.setText(
+                    "Backward traversal completed."
+            );
+        }
+
+        updateMetrics.accept(startTime);
+    });
+
+    // CLEAR
+    clearButton.setOnAction(e -> {
+
+        long startTime = System.nanoTime();
+
+        head[0] = null;
+        tail[0] = null;
+
+        refreshList.run();
+
+        statusLabel.setText(
+                "Doubly linked list cleared successfully."
+        );
+
+        outputArea.appendText(
+                "CLEAR: Doubly linked list emptied.\n"
+        );
+
+        updateMetrics.accept(startTime);
+    });
+
+    // CONTROLS
+    VBox controls = new VBox(15);
+    controls.setPadding(new Insets(20));
+
+    controls.getChildren().addAll(
+            inputLabel,
+            inputField,
+            firstRow,
+            secondRow,
+            statusLabel,
+            metrics,
+            new Label("Operation History"),
+            outputArea
+    );
+
+    controls.setStyle(
+            "-fx-background-color: white;" +
+            "-fx-background-radius: 8;"
+    );
+
+    VBox visualization = new VBox(12);
+    visualization.setPadding(new Insets(15));
+
+    visualization.getChildren().addAll(
+            visualTitle,
+            visualScroll,
+            sizeLabel
+    );
+
+    visualization.setStyle(
+            "-fx-background-color: white;" +
+            "-fx-background-radius: 8;"
+    );
+
+    mainContent.getChildren().addAll(
+            controls,
+            visualization
+    );
+
+    refreshList.run();
+
+    return mainContent;
+}
+
+    
+private VBox createBalancedBracketsInterface() {
+
+    VBox mainContent = new VBox(20);
+    mainContent.setPadding(new Insets(10));
+
+    int[] operationCount = {0};
+
+    // INTRODUCTION
+    Label explanation = new Label(
+            "Enter an expression to check whether its brackets are balanced."
+    );
+
+    explanation.setWrapText(true);
+
+    Label examples = new Label(
+            "Examples: {[()]}, (a+b), {[(])}, ((()))"
+    );
+
+    examples.setStyle(
+            "-fx-text-fill: #777777;" +
+            "-fx-font-style: italic;"
+    );
+
+    // INPUT
+    Label inputLabel = new Label("Enter your expression:");
+
+    TextField expressionField = new TextField();
+    expressionField.setPromptText("e.g. {[(a+b)*c]}");
+
+    Button checkButton = createActionButton("Check Brackets");
+    Button clearButton = createSecondaryButton("Clear");
+
+    HBox buttons = new HBox(10);
+    buttons.setAlignment(Pos.CENTER_LEFT);
+    buttons.getChildren().addAll(checkButton, clearButton);
+
+    // RESULT
+    Label resultLabel = new Label("Waiting for an expression...");
+
+    resultLabel.setWrapText(true);
+    resultLabel.setStyle(
+            "-fx-font-size: 16px;" +
+            "-fx-font-weight: bold;" +
+            "-fx-text-fill: " + BURGUNDY + ";"
+    );
+
+    // METRICS
+    Label operationLabel = new Label("Checks performed: 0");
+    Label timeLabel = new Label("Execution time: 0.000 ms");
+
+    HBox metrics = new HBox(25);
+    metrics.getChildren().addAll(operationLabel, timeLabel);
+
+    // STEP-BY-STEP EXPLANATION
+    Label stepsTitle = new Label("Step-by-Step Analysis");
+
+    stepsTitle.setStyle(
+            "-fx-font-size: 16px;" +
+            "-fx-font-weight: bold;" +
+            "-fx-text-fill: " + BURGUNDY + ";"
+    );
+
+    TextArea stepsArea = new TextArea();
+    stepsArea.setEditable(false);
+    stepsArea.setWrapText(true);
+    stepsArea.setPrefRowCount(9);
+    stepsArea.setPromptText(
+            "The checking process will appear here..."
+    );
+
+    // HISTORY
+    Label historyTitle = new Label("Operation History");
+
+    historyTitle.setStyle(
+            "-fx-font-weight: bold;" +
+            "-fx-text-fill: " + BURGUNDY + ";"
+    );
+
+    TextArea historyArea = new TextArea();
+    historyArea.setEditable(false);
+    historyArea.setWrapText(true);
+    historyArea.setPrefRowCount(4);
+    historyArea.setPromptText("Previous results...");
+
+    // CHECK BRACKETS
+    checkButton.setOnAction(e -> {
+
+        long startTime = System.nanoTime();
+
+        String expression = expressionField.getText();
+
+        stepsArea.clear();
+
+        if (expression == null || expression.trim().isEmpty()) {
+
+            resultLabel.setText(
+                    "Please enter an expression first."
+            );
+
+            stepsArea.setText(
+                    "No expression was provided."
+            );
+
+            return;
+        }
+
+        // STACK USED FOR BRACKET CHECKING
+        ArrayList<Character> stack = new ArrayList<>();
+
+        boolean balanced = true;
+        String errorMessage = "";
+
+        StringBuilder steps = new StringBuilder();
+
+        steps.append("Expression: ")
+                .append(expression)
+                .append("\n\n");
+
+        steps.append("Starting with an empty stack.\n\n");
+
+        for (int i = 0; i < expression.length(); i++) {
+
+            char current = expression.charAt(i);
+
+            // OPENING BRACKETS
+            if (current == '(' || current == '{' || current == '[') {
+
+                stack.add(current);
+
+                steps.append("Position ")
+                        .append(i + 1)
+                        .append(": Found opening bracket '")
+                        .append(current)
+                        .append("'. Push onto stack.\n");
+
+                steps.append("Stack: ")
+                        .append(stack)
+                        .append("\n\n");
+            }
+
+            // CLOSING BRACKETS
+            else if (current == ')' || current == '}' || current == ']') {
+
+                if (stack.isEmpty()) {
+
+                    balanced = false;
+
+                    errorMessage =
+                            "Closing bracket '" + current +
+                            "' at position " + (i + 1) +
+                            " has no matching opening bracket.";
+
+                    steps.append("Position ")
+                            .append(i + 1)
+                            .append(": Found closing bracket '")
+                            .append(current)
+                            .append("', but the stack is empty.\n");
+
+                    steps.append("ERROR: No matching opening bracket.\n");
+
+                    break;
+                }
+
+                char opening = stack.get(stack.size() - 1);
+
+                boolean matches =
+                        (opening == '(' && current == ')') ||
+                        (opening == '{' && current == '}') ||
+                        (opening == '[' && current == ']');
+
+                if (matches) {
+
+                    stack.remove(stack.size() - 1);
+
+                    steps.append("Position ")
+                            .append(i + 1)
+                            .append(": Found closing bracket '")
+                            .append(current)
+                            .append("'. It matches '")
+                            .append(opening)
+                            .append("'. Pop from stack.\n");
+
+                    steps.append("Stack: ")
+                            .append(stack)
+                            .append("\n\n");
+
+                } else {
+
+                    balanced = false;
+
+                    errorMessage =
+                            "Mismatched brackets: '" + opening +
+                            "' cannot be closed by '" + current +
+                            "' at position " + (i + 1) + ".";
+
+                    steps.append("Position ")
+                            .append(i + 1)
+                            .append(": Found '")
+                            .append(current)
+                            .append("', but the top of the stack is '")
+                            .append(opening)
+                            .append("'.\n");
+
+                    steps.append("ERROR: Brackets do not match.\n");
+
+                    break;
+                }
+            }
+
+            // IGNORE ORDINARY CHARACTERS
+            else {
+
+                steps.append("Position ")
+                        .append(i + 1)
+                        .append(": '")
+                        .append(current)
+                        .append("' is not a bracket. Ignore it.\n\n");
+            }
+        }
+
+        // CHECK FOR UNMATCHED OPENING BRACKETS
+        if (balanced && !stack.isEmpty()) {
+
+            balanced = false;
+
+            errorMessage =
+                    "Unclosed opening bracket(s) remain: " + stack;
+
+            steps.append("\nThe expression ended, but the stack is not empty.\n");
+
+            steps.append("Unmatched opening brackets: ")
+                    .append(stack)
+                    .append("\n");
+        }
+
+        // FINAL RESULT
+        if (balanced) {
+
+            resultLabel.setText(
+                    "BALANCED! All brackets match correctly."
+            );
+
+            steps.append("\nFINAL RESULT: BALANCED\n");
+
+            steps.append("The stack is empty. All brackets match.");
+
+            historyArea.appendText(
+                    "BALANCED: " + expression + "\n"
+            );
+
+        } else {
+
+            resultLabel.setText(
+                    "NOT BALANCED! " + errorMessage
+            );
+
+            steps.append("\nFINAL RESULT: NOT BALANCED\n");
+
+            steps.append(errorMessage);
+
+            historyArea.appendText(
+                    "NOT BALANCED: " + expression +
+                    "\nReason: " + errorMessage + "\n"
+            );
+        }
+
+        stepsArea.setText(steps.toString());
+
+        // UPDATE METRICS
+        operationCount[0]++;
+
+        double elapsed =
+                (System.nanoTime() - startTime) / 1_000_000.0;
+
+        operationLabel.setText(
+                "Checks performed: " + operationCount[0]
+        );
+
+        timeLabel.setText(
+                String.format("Execution time: %.6f ms", elapsed)
+        );
+    });
+
+    // CLEAR
+    clearButton.setOnAction(e -> {
+
+        expressionField.clear();
+        stepsArea.clear();
+
+        resultLabel.setText(
+                "Waiting for an expression..."
+        );
+
+        stepsArea.setPromptText(
+                "The checking process will appear here..."
+        );
+    });
+
+    // INPUT CARD
+    VBox inputCard = new VBox(12);
+
+    inputCard.setPadding(new Insets(20));
+
+    inputCard.getChildren().addAll(
+            explanation,
+            examples,
+            inputLabel,
+            expressionField,
+            buttons,
+            resultLabel,
+            metrics
+    );
+
+    inputCard.setStyle(
+            "-fx-background-color: white;" +
+            "-fx-background-radius: 8;"
+    );
+
+    // ANALYSIS CARD
+    VBox analysisCard = new VBox(12);
+
+    analysisCard.setPadding(new Insets(20));
+
+    analysisCard.getChildren().addAll(
+            stepsTitle,
+            stepsArea
+    );
+
+    analysisCard.setStyle(
+            "-fx-background-color: white;" +
+            "-fx-background-radius: 8;"
+    );
+
+    // HISTORY CARD
+    VBox historyCard = new VBox(12);
+
+    historyCard.setPadding(new Insets(20));
+
+    historyCard.getChildren().addAll(
+            historyTitle,
+            historyArea
+    );
+
+    historyCard.setStyle(
+            "-fx-background-color: white;" +
+            "-fx-background-radius: 8;"
+    );
+
+    mainContent.getChildren().addAll(
+            inputCard,
+            analysisCard,
+            historyCard
+    );
+
+    return mainContent;
+}
+    
+
+
 
     public static void main(String[] args) {
         launch(args);
