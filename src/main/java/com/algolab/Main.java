@@ -52,6 +52,14 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
+import javafx.scene.control.ComboBox;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Region;
+import com.algolab.sorting.visualizer.SortingEngine;
+import com.algolab.sorting.visualizer.SortingStep;
 
 public class Main extends Application {
 
@@ -127,11 +135,10 @@ public class Main extends Application {
         dataButton.setOnAction(e ->
         showPage(root, createDataStructuresPage(root)));
 
+        
         sortingButton.setOnAction(e ->
-                showPage(root, createModulePage(
-                        "Sorting Lab",
-                        "Explore and compare different sorting algorithms."
-                )));
+                showPage(root, createSortingPage(root)));
+
 
         analysisButton.setOnAction(e ->
                 showPage(root, createComplexityPage()));
@@ -255,11 +262,8 @@ public class Main extends Application {
         dataCard.setOnMouseClicked(e ->
                 showPage(root, createDataStructuresPage(root)));
 
-        sortingCard.setOnMouseClicked(e ->
-                showPage(root, createModulePage(
-                        "Sorting Lab",
-                        "Explore and compare different sorting algorithms."
-                )));
+       sortingCard.setOnMouseClicked(e ->
+        showPage(root, createSortingPage(root)));
 
         analysisCard.setOnMouseClicked(e ->
                 showPage(root, createComplexityPage()));
@@ -4337,4 +4341,408 @@ private VBox createBalancedBracketsInterface() {
     public static void main(String[] args) {
         launch(args);
     }
+
+
+
+private VBox createSortingPage(BorderPane root) {
+
+    VBox page = new VBox(22);
+    page.setPadding(new Insets(30));
+    page.setStyle("-fx-background-color: #f5f5f5;");
+
+    Label title = new Label("Sorting Algorithms");
+    title.setStyle("-fx-font-size: 28px; -fx-font-weight: bold;");
+
+    Label subtitle = new Label(
+        "Enter numbers, select a sorting algorithm and watch each step."
+    );
+
+    // CONFIGURATION
+    VBox configuration = new VBox(15);
+    configuration.setPadding(new Insets(25));
+    configuration.setStyle(
+        "-fx-background-color: white;" +
+        "-fx-background-radius: 12;"
+    );
+
+    Label configTitle = new Label("Sorting Configuration");
+    configTitle.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
+
+    Label inputLabel = new Label("Enter numbers separated by commas:");
+
+    TextField inputField = new TextField("5, 2, 8, 1, 4");
+    inputField.setMaxWidth(Double.MAX_VALUE);
+
+    Label algorithmLabel = new Label("Select sorting algorithm:");
+
+    ComboBox<String> algorithmBox = new ComboBox<>();
+    algorithmBox.getItems().addAll(
+        "Bubble Sort",
+        "Selection Sort",
+        "Insertion Sort",
+        "Merge Sort",
+        "Quick Sort"
+    );
+    algorithmBox.setValue("Bubble Sort");
+    algorithmBox.setMaxWidth(Double.MAX_VALUE);
+
+    Button startButton = new Button("Start Sorting");
+    Button nextButton = new Button("Next Step");
+    Button autoButton = new Button("Auto Play");
+    Button resetButton = new Button("Reset");
+
+    String primaryStyle =
+        "-fx-background-color: #800020;" +
+        "-fx-text-fill: white;" +
+        "-fx-font-weight: bold;" +
+        "-fx-padding: 12 20;";
+
+    String secondaryStyle =
+        "-fx-background-color: #eeeeee;" +
+        "-fx-text-fill: #333333;" +
+        "-fx-font-weight: bold;" +
+        "-fx-padding: 12 20;";
+
+    startButton.setStyle(primaryStyle);
+    nextButton.setStyle(secondaryStyle);
+    autoButton.setStyle(secondaryStyle);
+    resetButton.setStyle(secondaryStyle);
+
+// Make buttons respond when the mouse moves over them
+
+startButton.setCursor(javafx.scene.Cursor.HAND);
+nextButton.setCursor(javafx.scene.Cursor.HAND);
+autoButton.setCursor(javafx.scene.Cursor.HAND);
+resetButton.setCursor(javafx.scene.Cursor.HAND);
+
+// Add explanations when hovering
+
+startButton.setTooltip(new javafx.scene.control.Tooltip(
+    "Prepare the sorting process using your selected algorithm."
+));
+
+nextButton.setTooltip(new javafx.scene.control.Tooltip(
+    "Move forward and see the next sorting operation."
+));
+
+autoButton.setTooltip(new javafx.scene.control.Tooltip(
+    "Automatically play all the sorting steps."
+));
+
+resetButton.setTooltip(new javafx.scene.control.Tooltip(
+    "Return to the original array and start again."
+));
+
+// Hover colours
+
+startButton.setOnMouseEntered(e -> startButton.setStyle(
+    "-fx-background-color: #a33352; -fx-text-fill: white;" +
+    "-fx-font-weight: bold; -fx-padding: 12 20;"
+));
+
+startButton.setOnMouseExited(e -> startButton.setStyle(primaryStyle));
+
+nextButton.setOnMouseEntered(e -> nextButton.setStyle(
+    "-fx-background-color: #d5d5d5; -fx-text-fill: #333333;" +
+    "-fx-font-weight: bold; -fx-padding: 12 20;"
+));
+
+nextButton.setOnMouseExited(e -> nextButton.setStyle(secondaryStyle));
+
+autoButton.setOnMouseEntered(e -> autoButton.setStyle(
+    "-fx-background-color: #d5d5d5; -fx-text-fill: #333333;" +
+    "-fx-font-weight: bold; -fx-padding: 12 20;"
+));
+
+autoButton.setOnMouseExited(e -> autoButton.setStyle(secondaryStyle));
+
+resetButton.setOnMouseEntered(e -> resetButton.setStyle(
+    "-fx-background-color: #d5d5d5; -fx-text-fill: #333333;" +
+    "-fx-font-weight: bold; -fx-padding: 12 20;"
+));
+
+resetButton.setOnMouseExited(e -> resetButton.setStyle(secondaryStyle));
+
+
+    HBox controls = new HBox(12,
+        startButton, nextButton, autoButton, resetButton
+    );
+
+    controls.setAlignment(Pos.CENTER_LEFT);
+
+    configuration.getChildren().addAll(
+        configTitle,
+        inputLabel,
+        inputField,
+        algorithmLabel,
+        algorithmBox,
+        controls
+    );
+
+    // ARRAY VISUALIZATION
+    VBox visualization = new VBox(20);
+    visualization.setPadding(new Insets(25));
+    visualization.setStyle(
+        "-fx-background-color: white;" +
+        "-fx-background-radius: 12;"
+    );
+
+    Label visualizationTitle = new Label("Array Visualization");
+    visualizationTitle.setStyle(
+        "-fx-font-size: 20px; -fx-font-weight: bold;"
+    );
+
+    FlowPane arrayDisplay = new FlowPane(12, 12);
+    arrayDisplay.setAlignment(Pos.CENTER);
+    arrayDisplay.setPrefWrapLength(800);
+
+    Label stepDescription = new Label("Ready to begin sorting.");
+
+    Label instructionLabel = new Label(
+    "STEP 1: Enter your numbers, select an algorithm, then click Start Sorting."
+);
+
+instructionLabel.setWrapText(true);
+instructionLabel.setStyle(
+    "-fx-font-size: 14px;" +
+    "-fx-font-weight: bold;" +
+    "-fx-text-fill: #800020;"
+);
+    visualization.getChildren().addAll(
+    visualizationTitle,
+    instructionLabel,
+    arrayDisplay,
+    stepDescription
+);
+
+    // PERFORMANCE RESULTS
+    VBox results = new VBox(15);
+    results.setPadding(new Insets(25));
+    results.setStyle(
+        "-fx-background-color: white;" +
+        "-fx-background-radius: 12;"
+    );
+
+    Label resultsTitle = new Label("Performance Results");
+    resultsTitle.setStyle(
+        "-fx-font-size: 20px; -fx-font-weight: bold;"
+    );
+
+    Label comparisonsLabel = new Label("Comparisons: 0");
+    Label movementsLabel = new Label("Swaps / movements: 0");
+    Label timeLabel = new Label("Execution Time: 0 ns");
+    Label stepLabel = new Label("Step: 0 / 0");
+    Label sortedLabel = new Label("Sorted result: []");
+
+    results.getChildren().addAll(
+        resultsTitle,
+        comparisonsLabel,
+        movementsLabel,
+        timeLabel,
+        stepLabel,
+        sortedLabel
+    );
+
+    // SORTING STATE
+    SortingEngine engine = new SortingEngine();
+
+    final List<SortingStep>[] steps = new List[]{
+    new java.util.ArrayList<>()
+};
+   final int[][] originalArray = {new int[0]};
+
+    final int[] currentStep = {0};
+    final long[] startTime = {0};
+
+    Timeline timeline = new Timeline();
+
+    // DISPLAY ARRAY
+    java.util.function.Consumer<int[]> displayArray = values -> {
+
+        arrayDisplay.getChildren().clear();
+
+        for (int value : values) {
+
+            Label box = new Label(String.valueOf(value));
+
+            box.setAlignment(Pos.CENTER);
+            box.setMinSize(65, 65);
+            box.setPrefSize(65, 65);
+
+            box.setStyle(
+                "-fx-background-color: #800020;" +
+                "-fx-text-fill: white;" +
+                "-fx-font-size: 20px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-background-radius: 10;"
+            );
+
+            arrayDisplay.getChildren().add(box);
+        }
+    };
+
+    // DISPLAY CURRENT STEP
+    java.util.function.Consumer<SortingStep> displayStep = step -> {
+
+        displayArray.accept(step.getArray());
+
+        comparisonsLabel.setText(
+            "Comparisons: " + step.getComparisons()
+        );
+
+        movementsLabel.setText(
+            "Swaps / movements: " + step.getMovements()
+        );
+
+        stepDescription.setText(step.getDescription());
+
+        stepLabel.setText(
+            "Step: " + currentStep[0] + " / " + (steps[0].size() - 1)
+        );
+
+        sortedLabel.setText(
+            "Sorted result: " +
+            java.util.Arrays.toString(step.getArray())
+        );
+    };
+
+    // START SORTING
+    startButton.setOnAction(e -> {
+
+        timeline.stop();
+
+        try {
+
+            String[] tokens = inputField.getText()
+                .trim()
+                .split("[,\\s]+");
+
+            originalArray[0] = new int[tokens.length];
+
+            for (int i = 0; i < tokens.length; i++) {
+                originalArray[0][i] = Integer.parseInt(tokens[i]);
+            }
+
+            if (originalArray[0].length == 0) {
+                throw new NumberFormatException();
+            }
+
+            steps[0] = engine.generateSteps(
+                originalArray[0],
+                algorithmBox.getValue()
+            );
+
+            currentStep[0] = 0;
+            startTime[0] = System.nanoTime();
+
+            displayStep.accept(steps[0].get(0));
+
+            timeLabel.setText("Execution Time: 0 ns");
+
+        } catch (Exception ex) {
+
+            stepDescription.setText(
+                "Invalid input! Enter integers separated by commas."
+            );
+        }
+    });
+
+    // NEXT STEP
+    nextButton.setOnAction(e -> {
+
+        timeline.stop();
+
+        if (steps[0].isEmpty()) {
+            stepDescription.setText("Click Start Sorting first.");
+            return;
+        }
+
+        if (currentStep[0] < steps[0].size() - 1) {
+
+            currentStep[0]++;
+
+            displayStep.accept(steps[0].get(currentStep[0]));
+
+            timeLabel.setText(
+                "Execution Time: " +
+                (System.nanoTime() - startTime[0]) + " ns"
+            );
+
+        } else {
+
+            stepDescription.setText("Sorting completed!");
+        }
+    });
+
+    // AUTO PLAY
+    autoButton.setOnAction(e -> {
+
+        if (steps[0].isEmpty()) {
+            stepDescription.setText("Click Start Sorting first.");
+            return;
+        }
+
+        timeline.stop();
+
+        timeline.getKeyFrames().setAll(
+            new KeyFrame(Duration.millis(700), event -> {
+
+                if (currentStep[0] < steps[0].size() - 1) {
+
+                    currentStep[0]++;
+
+                    displayStep.accept(steps[0].get(currentStep[0]));
+
+                    timeLabel.setText(
+                        "Execution Time: " +
+                        (System.nanoTime() - startTime[0]) + " ns"
+                    );
+
+                } else {
+
+                    timeline.stop();
+                    stepDescription.setText("Sorting completed!");
+                }
+            })
+        );
+
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
+    });
+
+    // RESET
+    resetButton.setOnAction(e -> {
+
+        timeline.stop();
+
+        steps[0].clear();
+        currentStep[0] = 0;
+
+        displayArray.accept(originalArray[0]);
+
+        comparisonsLabel.setText("Comparisons: 0");
+        movementsLabel.setText("Swaps / movements: 0");
+        timeLabel.setText("Execution Time: 0 ns");
+        stepLabel.setText("Step: 0 / 0");
+
+        sortedLabel.setText(
+            "Sorted result: " +
+            java.util.Arrays.toString(originalArray[0])
+        );
+
+        stepDescription.setText("Array reset.");
+    });
+
+    page.getChildren().addAll(
+        title,
+        subtitle,
+        configuration,
+        visualization,
+        results
+    );
+
+    return page;
+}
+
+
 }
