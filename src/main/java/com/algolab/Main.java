@@ -2546,11 +2546,10 @@ private VBox createCircularQueueInterface() {
 
     final int capacity = 10;
 
-    int[] queue = new int[capacity];
-    int[] front = {0};
-    int[] rear = {-1};
-    int[] size = {0};
-    int[] operationCount = {0};
+com.algolab.datastructures.CircularQueue queue =
+        new com.algolab.datastructures.CircularQueue(capacity);
+
+int[] operationCount = {0};
 
     // INPUT
     Label inputLabel = new Label("Enter an integer:");
@@ -2614,6 +2613,8 @@ private VBox createCircularQueueInterface() {
     Label pointerLabel = new Label("Front: -     Rear: -");
 
     // REFRESH VISUALIZATION
+    
+    // REFRESH VISUALIZATION
     Runnable refreshQueue = () -> {
 
         queueVisual.getChildren().clear();
@@ -2633,10 +2634,11 @@ private VBox createCircularQueueInterface() {
                     "-fx-text-fill: #777777;"
             );
 
+            boolean occupied = queue.isOccupied(i);
+
             Label valueLabel = new Label(
-                    size[0] > 0 &&
-                    ((i - front[0] + capacity) % capacity) < size[0]
-                            ? String.valueOf(queue[i])
+                    occupied
+                            ? String.valueOf(queue.getValueAtIndex(i))
                             : "-"
             );
 
@@ -2648,11 +2650,20 @@ private VBox createCircularQueueInterface() {
 
             Label pointer = new Label("");
 
-            if (size[0] > 0 && i == front[0] && i == rear[0]) {
+            if (!queue.isEmpty()
+                    && i == queue.getFrontIndex()
+                    && i == queue.getRearIndex()) {
+
                 pointer.setText("F/R");
-            } else if (size[0] > 0 && i == front[0]) {
+
+            } else if (!queue.isEmpty()
+                    && i == queue.getFrontIndex()) {
+
                 pointer.setText("FRONT");
-            } else if (size[0] > 0 && i == rear[0]) {
+
+            } else if (!queue.isEmpty()
+                    && i == queue.getRearIndex()) {
+
                 pointer.setText("REAR");
             }
 
@@ -2662,13 +2673,15 @@ private VBox createCircularQueueInterface() {
                     "-fx-text-fill: " + BURGUNDY + ";"
             );
 
-            slot.getChildren().addAll(indexLabel, valueLabel, pointer);
+            slot.getChildren().addAll(
+                    indexLabel,
+                    valueLabel,
+                    pointer
+            );
 
             slot.setStyle(
                     "-fx-background-color: " +
-                    (size[0] > 0 &&
-                    ((i - front[0] + capacity) % capacity) < size[0]
-                            ? "#F0DDDD" : "#F4F4F4") +
+                    (occupied ? "#F0DDDD" : "#F4F4F4") +
                     ";" +
                     "-fx-border-color: " + BURGUNDY + ";" +
                     "-fx-border-radius: 5;" +
@@ -2679,17 +2692,22 @@ private VBox createCircularQueueInterface() {
         }
 
         positionLabel.setText(
-                "Elements: " + size[0] + " / " + capacity
+                "Elements: " + queue.size() + " / " + capacity
         );
 
-        if (size[0] == 0) {
+        if (queue.isEmpty()) {
+
             pointerLabel.setText("Front: -     Rear: -");
+
         } else {
+
             pointerLabel.setText(
-                    "Front: " + front[0] + "     Rear: " + rear[0]
+                    "Front: " + queue.getFrontIndex()
+                    + "     Rear: " + queue.getRearIndex()
             );
         }
     };
+
 
     // UPDATE METRICS
     java.util.function.LongConsumer updateMetrics = startTime -> {
@@ -2709,6 +2727,8 @@ private VBox createCircularQueueInterface() {
     };
 
     // ENQUEUE
+    
+    // ENQUEUE
     enqueueButton.setOnAction(e -> {
 
         long startTime = System.nanoTime();
@@ -2717,7 +2737,7 @@ private VBox createCircularQueueInterface() {
 
             int value = Integer.parseInt(inputField.getText().trim());
 
-            if (size[0] == capacity) {
+            if (queue.isFull()) {
 
                 statusLabel.setText(
                         "Queue Overflow! The circular queue is full."
@@ -2729,15 +2749,7 @@ private VBox createCircularQueueInterface() {
 
             } else {
 
-                rear[0] = (rear[0] + 1) % capacity;
-
-                queue[rear[0]] = value;
-
-                if (size[0] == 0) {
-                    front[0] = rear[0];
-                }
-
-                size[0]++;
+                queue.enqueue(value);
 
                 statusLabel.setText(
                         "Successfully enqueued " + value + "."
@@ -2745,7 +2757,7 @@ private VBox createCircularQueueInterface() {
 
                 outputArea.appendText(
                         "ENQUEUE: " + value +
-                        " inserted at index " + rear[0] + "\n"
+                        " inserted at index " + queue.getRearIndex() + "\n"
                 );
 
                 refreshQueue.run();
@@ -2761,12 +2773,15 @@ private VBox createCircularQueueInterface() {
         updateMetrics.accept(startTime);
     });
 
+
+    // DEQUEUE
+    
     // DEQUEUE
     dequeueButton.setOnAction(e -> {
 
         long startTime = System.nanoTime();
 
-        if (size[0] == 0) {
+        if (queue.isEmpty()) {
 
             statusLabel.setText(
                     "Queue Underflow! The circular queue is empty."
@@ -2778,18 +2793,8 @@ private VBox createCircularQueueInterface() {
 
         } else {
 
-            int removed = queue[front[0]];
-
-            int removedIndex = front[0];
-
-            front[0] = (front[0] + 1) % capacity;
-
-            size[0]--;
-
-            if (size[0] == 0) {
-                front[0] = 0;
-                rear[0] = -1;
-            }
+            int removedIndex = queue.getFrontIndex();
+            int removed = queue.dequeue();
 
             statusLabel.setText(
                     "Successfully dequeued " + removed + "."
@@ -2806,23 +2811,26 @@ private VBox createCircularQueueInterface() {
         updateMetrics.accept(startTime);
     });
 
+
+    // FRONT
+    
     // FRONT
     frontButton.setOnAction(e -> {
 
         long startTime = System.nanoTime();
 
-        if (size[0] == 0) {
+        if (queue.isEmpty()) {
 
             statusLabel.setText("Circular queue is empty.");
 
         } else {
 
             statusLabel.setText(
-                    "Front element: " + queue[front[0]]
+                    "Front element: " + queue.peek()
             );
 
             outputArea.appendText(
-                    "FRONT: " + queue[front[0]] + "\n"
+                    "FRONT: " + queue.peek() + "\n"
             );
         }
 
@@ -2830,34 +2838,39 @@ private VBox createCircularQueueInterface() {
     });
 
     // REAR
+    
+    // REAR
     rearButton.setOnAction(e -> {
 
         long startTime = System.nanoTime();
 
-        if (size[0] == 0) {
+        if (queue.isEmpty()) {
 
             statusLabel.setText("Circular queue is empty.");
 
         } else {
 
             statusLabel.setText(
-                    "Rear element: " + queue[rear[0]]
+                    "Rear element: " + queue.getRearElement()
             );
 
             outputArea.appendText(
-                    "REAR: " + queue[rear[0]] + "\n"
+                    "REAR: " + queue.getRearElement() + "\n"
             );
         }
 
         updateMetrics.accept(startTime);
     });
 
+
+    // DISPLAY
+    
     // DISPLAY
     displayButton.setOnAction(e -> {
 
         long startTime = System.nanoTime();
 
-        if (size[0] == 0) {
+        if (queue.isEmpty()) {
 
             outputArea.appendText("Circular queue is empty.\n");
 
@@ -2867,13 +2880,13 @@ private VBox createCircularQueueInterface() {
 
             result.append("QUEUE (FRONT → REAR): ");
 
-            for (int i = 0; i < size[0]; i++) {
+            java.util.List<Integer> elements = queue.getElements();
 
-                int index = (front[0] + i) % capacity;
+            for (int i = 0; i < elements.size(); i++) {
 
-                result.append(queue[index]);
+                result.append(elements.get(i));
 
-                if (i < size[0] - 1) {
+                if (i < elements.size() - 1) {
                     result.append(" → ");
                 }
             }
@@ -2889,13 +2902,15 @@ private VBox createCircularQueueInterface() {
     });
 
     // CLEAR
+    
+    // CLEAR
+    
+    // CLEAR
     clearButton.setOnAction(e -> {
 
         long startTime = System.nanoTime();
 
-        size[0] = 0;
-        front[0] = 0;
-        rear[0] = -1;
+        queue.clear();
 
         refreshQueue.run();
 
@@ -2968,19 +2983,11 @@ private VBox createSinglyLinkedListInterface() {
     mainContent.setPadding(new Insets(10));
 
     // NODE STRUCTURE
-    class Node {
-        int data;
-        Node next;
+    // SINGLY LINKED LIST BACKEND
+com.algolab.datastructures.SinglyLinkedList list =
+        new com.algolab.datastructures.SinglyLinkedList();
 
-        Node(int data) {
-            this.data = data;
-            this.next = null;
-        }
-    }
-
-    Node[] head = {null};
-    int[] operationCount = {0};
-
+int[] operationCount = {0};
     // INPUT
     Label inputLabel = new Label("Enter an integer:");
 
@@ -3052,11 +3059,15 @@ private VBox createSinglyLinkedListInterface() {
     visualScroll.setStyle("-fx-background: white;");
 
     // REFRESH VISUALIZATION
+    
+    // REFRESH VISUALIZATION
     Runnable refreshList = () -> {
 
         listVisual.getChildren().clear();
 
-        if (head[0] == null) {
+        java.util.List<Integer> elements = list.getElements();
+
+        if (list.isEmpty()) {
 
             Label emptyLabel = new Label("HEAD → NULL (Empty list)");
 
@@ -3069,10 +3080,7 @@ private VBox createSinglyLinkedListInterface() {
 
         } else {
 
-            Node current = head[0];
-            int count = 0;
-
-            while (current != null) {
+            for (int i = 0; i < elements.size(); i++) {
 
                 VBox nodeBox = new VBox(5);
                 nodeBox.setAlignment(Pos.CENTER);
@@ -3080,7 +3088,7 @@ private VBox createSinglyLinkedListInterface() {
                 nodeBox.setMinWidth(75);
 
                 Label nodeTitle = new Label(
-                        count == 0 ? "HEAD" : "NODE"
+                        i == 0 ? "HEAD" : "NODE"
                 );
 
                 nodeTitle.setStyle(
@@ -3090,7 +3098,7 @@ private VBox createSinglyLinkedListInterface() {
                 );
 
                 Label dataLabel = new Label(
-                        String.valueOf(current.data)
+                        String.valueOf(elements.get(i))
                 );
 
                 dataLabel.setStyle(
@@ -3117,7 +3125,7 @@ private VBox createSinglyLinkedListInterface() {
 
                 listVisual.getChildren().add(nodeBox);
 
-                if (current.next != null) {
+                if (i < elements.size() - 1) {
 
                     Label arrow = new Label("→");
 
@@ -3129,9 +3137,6 @@ private VBox createSinglyLinkedListInterface() {
 
                     listVisual.getChildren().add(arrow);
                 }
-
-                current = current.next;
-                count++;
             }
 
             Label nullLabel = new Label("→ NULL");
@@ -3144,15 +3149,9 @@ private VBox createSinglyLinkedListInterface() {
             listVisual.getChildren().add(nullLabel);
         }
 
-        int count = 0;
-        Node current = head[0];
-
-        while (current != null) {
-            count++;
-            current = current.next;
-        }
-
-        sizeLabel.setText("Number of nodes: " + count);
+        sizeLabel.setText(
+                "Number of nodes: " + list.size()
+        );
     };
 
     // METRICS
@@ -3173,251 +3172,182 @@ private VBox createSinglyLinkedListInterface() {
     };
 
     // INSERT AT END
-    insertButton.setOnAction(e -> {
+    // INSERT AT END
+insertButton.setOnAction(e -> {
 
-        long startTime = System.nanoTime();
+    long startTime = System.nanoTime();
 
-        try {
+    try {
 
-            int value = Integer.parseInt(inputField.getText().trim());
+        int value = Integer.parseInt(inputField.getText().trim());
 
-            Node newNode = new Node(value);
+        list.insert(value);
 
-            if (head[0] == null) {
+        statusLabel.setText(
+                "Successfully inserted " + value + "."
+        );
 
-                head[0] = newNode;
+        outputArea.appendText(
+                "INSERT: Added " + value + " at the end.\n"
+        );
 
-            } else {
+        refreshList.run();
 
-                Node current = head[0];
+        inputField.clear();
 
-                while (current.next != null) {
-                    current = current.next;
-                }
+    } catch (NumberFormatException ex) {
 
-                current.next = newNode;
-            }
+        statusLabel.setText(
+                "Invalid input! Please enter an integer."
+        );
+    }
+
+    updateMetrics.accept(startTime);
+});
+    // DELETE BY VALUE
+    // DELETE BY VALUE
+deleteButton.setOnAction(e -> {
+
+    long startTime = System.nanoTime();
+
+    try {
+
+        int value = Integer.parseInt(inputField.getText().trim());
+
+        if (list.isEmpty()) {
 
             statusLabel.setText(
-                    "Successfully inserted " + value + "."
+                    "Cannot delete. The linked list is empty."
             );
 
             outputArea.appendText(
-                    "INSERT: Added " + value + " at the end.\n"
+                    "ERROR: Cannot delete from an empty list.\n"
+            );
+
+        } else if (list.delete(value)) {
+
+            statusLabel.setText(
+                    "Successfully deleted " + value + "."
+            );
+
+            outputArea.appendText(
+                    "DELETE: Removed " + value + ".\n"
             );
 
             refreshList.run();
 
-            inputField.clear();
-
-        } catch (NumberFormatException ex) {
+        } else {
 
             statusLabel.setText(
-                    "Invalid input! Please enter an integer."
+                    value + " does not exist in the list."
             );
-        }
-
-        updateMetrics.accept(startTime);
-    });
-
-    // DELETE BY VALUE
-    deleteButton.setOnAction(e -> {
-
-        long startTime = System.nanoTime();
-
-        try {
-
-            int value = Integer.parseInt(inputField.getText().trim());
-
-            if (head[0] == null) {
-
-                statusLabel.setText(
-                        "Cannot delete. The linked list is empty."
-                );
-
-                outputArea.appendText(
-                        "ERROR: Cannot delete from an empty list.\n"
-                );
-
-            } else if (head[0].data == value) {
-
-                head[0] = head[0].next;
-
-                statusLabel.setText(
-                        "Successfully deleted " + value + "."
-                );
-
-                outputArea.appendText(
-                        "DELETE: Removed " + value + ".\n"
-                );
-
-                refreshList.run();
-
-            } else {
-
-                Node current = head[0];
-
-                while (current.next != null &&
-                        current.next.data != value) {
-
-                    current = current.next;
-                }
-
-                if (current.next == null) {
-
-                    statusLabel.setText(
-                            value + " does not exist in the list."
-                    );
-
-                    outputArea.appendText(
-                            "ERROR: " + value + " was not found.\n"
-                    );
-
-                } else {
-
-                    current.next = current.next.next;
-
-                    statusLabel.setText(
-                            "Successfully deleted " + value + "."
-                    );
-
-                    outputArea.appendText(
-                            "DELETE: Removed " + value + ".\n"
-                    );
-
-                    refreshList.run();
-                }
-            }
-
-        } catch (NumberFormatException ex) {
-
-            statusLabel.setText(
-                    "Invalid input! Please enter an integer."
-            );
-        }
-
-        updateMetrics.accept(startTime);
-    });
-
-    // SEARCH
-    searchButton.setOnAction(e -> {
-
-        long startTime = System.nanoTime();
-
-        try {
-
-            int value = Integer.parseInt(inputField.getText().trim());
-
-            Node current = head[0];
-            int position = 0;
-            boolean found = false;
-
-            while (current != null) {
-
-                if (current.data == value) {
-
-                    found = true;
-                    break;
-                }
-
-                current = current.next;
-                position++;
-            }
-
-            if (found) {
-
-                statusLabel.setText(
-                        value + " found at position " + position + "."
-                );
-
-                outputArea.appendText(
-                        "SEARCH: " + value +
-                        " found at position " + position + ".\n"
-                );
-
-            } else {
-
-                statusLabel.setText(
-                        value + " does not exist in the list."
-                );
-
-                outputArea.appendText(
-                        "SEARCH: " + value + " not found.\n"
-                );
-            }
-
-        } catch (NumberFormatException ex) {
-
-            statusLabel.setText(
-                    "Invalid input! Please enter an integer."
-            );
-        }
-
-        updateMetrics.accept(startTime);
-    });
-
-    // TRAVERSE
-    traverseButton.setOnAction(e -> {
-
-        long startTime = System.nanoTime();
-
-        if (head[0] == null) {
-
-            statusLabel.setText("The linked list is empty.");
 
             outputArea.appendText(
-                    "TRAVERSE: Empty linked list.\n"
+                    "ERROR: " + value + " was not found.\n"
+            );
+        }
+
+    } catch (NumberFormatException ex) {
+
+        statusLabel.setText(
+                "Invalid input! Please enter an integer."
+        );
+    }
+
+    updateMetrics.accept(startTime);
+});
+    
+    // SEARCH
+searchButton.setOnAction(e -> {
+
+    long startTime = System.nanoTime();
+
+    try {
+
+        int value = Integer.parseInt(inputField.getText().trim());
+
+        int position = list.search(value);
+
+        if (position != -1) {
+
+            statusLabel.setText(
+                    value + " found at position " + position + "."
+            );
+
+            outputArea.appendText(
+                    "SEARCH: " + value +
+                    " found at position " + position + ".\n"
             );
 
         } else {
 
-            StringBuilder result = new StringBuilder();
-
-            result.append("HEAD → ");
-
-            Node current = head[0];
-
-            while (current != null) {
-
-                result.append(current.data);
-                result.append(" → ");
-
-                current = current.next;
-            }
-
-            result.append("NULL");
-
-            outputArea.appendText(
-                    "TRAVERSE: " + result + "\n"
+            statusLabel.setText(
+                    value + " does not exist in the list."
             );
 
-            statusLabel.setText(
-                    "Linked list traversed successfully."
+            outputArea.appendText(
+                    "SEARCH: " + value + " not found.\n"
             );
         }
 
-        updateMetrics.accept(startTime);
-    });
-
-    // CLEAR
-    clearButton.setOnAction(e -> {
-
-        long startTime = System.nanoTime();
-
-        head[0] = null;
-
-        refreshList.run();
+    } catch (NumberFormatException ex) {
 
         statusLabel.setText(
-                "Linked list cleared successfully."
+                "Invalid input! Please enter an integer."
         );
+    }
+
+    updateMetrics.accept(startTime);
+});
+    
+    // TRAVERSE
+traverseButton.setOnAction(e -> {
+
+    long startTime = System.nanoTime();
+
+    if (list.isEmpty()) {
+
+        statusLabel.setText("The linked list is empty.");
 
         outputArea.appendText(
-                "CLEAR: Linked list emptied.\n"
+                "TRAVERSE: Empty linked list.\n"
         );
 
-        updateMetrics.accept(startTime);
-    });
+    } else {
+
+        String result = list.traverse();
+
+        outputArea.appendText(
+                "TRAVERSE: " + result + "\n"
+        );
+
+        statusLabel.setText(
+                "Linked list traversed successfully."
+        );
+    }
+
+    updateMetrics.accept(startTime);
+});
+    
+    // CLEAR
+clearButton.setOnAction(e -> {
+
+    long startTime = System.nanoTime();
+
+    list.clear();
+
+    refreshList.run();
+
+    statusLabel.setText(
+            "Linked list cleared successfully."
+    );
+
+    outputArea.appendText(
+            "CLEAR: Linked list emptied.\n"
+    );
+
+    updateMetrics.accept(startTime);
+});
 
     // CONTROLS
     VBox controls = new VBox(15);
