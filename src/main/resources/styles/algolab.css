@@ -1,0 +1,194 @@
+
+/* =========================================
+   ALGORITHM EXPLORER — SHARED LAB THEME
+   ========================================= */
+
+/* Main workspace */
+.root {
+    -fx-font-family: "Segoe UI";
+    -fx-background-color: #F7F4F1;
+}
+
+.lab-page {
+    -fx-background-color: linear-gradient(
+        to bottom right,
+        #F7F4F1,
+        #EEE7E8,
+        #E9EDF2
+    );
+}
+
+/* Headings and descriptions */
+.label {
+    -fx-text-fill: #4A3036;
+}
+
+.lab-heading {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #642B3A;
+}
+
+.lab-description {
+    -fx-font-size: 13px;
+    -fx-text-fill: #817477;
+}
+
+/* Buttons */
+.button {
+    -fx-background-color: #642B3A;
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 9px;
+    -fx-padding: 10px 18px;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #814253;
+    -fx-effect: dropshadow(
+        gaussian,
+        rgba(100, 43, 58, 0.20),
+        10, 0, 0, 3
+    );
+}
+
+.button:pressed {
+    -fx-background-color: #49202C;
+}
+
+/* Text fields */
+.text-field,
+.text-area {
+    -fx-background-color: #FFFFFF;
+    -fx-text-fill: #3F3032;
+    -fx-prompt-text-fill: #A99B9E;
+    -fx-border-color: #E3D5D8;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 9px;
+}
+
+.text-field:focused,
+.text-area:focused {
+    -fx-border-color: #8297B0;
+    -fx-border-width: 1.5px;
+}
+
+/* Dropdowns */
+.combo-box,
+.choice-box {
+    -fx-background-color: white;
+    -fx-border-color: #E3D5D8;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: #4A3036;
+}
+
+/* Tabs */
+.tab-pane .tab-header-area .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+.tab-pane .tab {
+    -fx-background-color: #E8DCE0;
+    -fx-background-radius: 8px 8px 0 0;
+    -fx-padding: 9px 16px;
+}
+
+.tab-pane .tab:selected {
+    -fx-background-color: #642B3A;
+}
+
+.tab-pane .tab .tab-label {
+    -fx-text-fill: #642B3A;
+    -fx-font-weight: bold;
+}
+
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: white;
+}
+
+/* Tables */
+.table-view {
+    -fx-background-color: white;
+    -fx-border-color: #E3D5D8;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #E8DCE0;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #642B3A;
+    -fx-font-weight: bold;
+}
+
+.table-row-cell {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent #F0E9E9 transparent;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #E8DCE0;
+}
+
+/* Scroll areas */
+.scroll-pane {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+/* Separators */
+.separator .line {
+    -fx-border-color: #E3D5D8;
+}
+
+/* Checkboxes and radio buttons */
+.check-box,
+.radio-button {
+    -fx-text-fill: #4A3036;
+}
+
+/* Progress bars */
+.progress-bar .track {
+    -fx-background-color: #E8DCE0;
+    -fx-background-radius: 8px;
+}
+
+.progress-bar .bar {
+    -fx-background-color: #78958B;
+    -fx-background-radius: 8px;
+}
+
+/* Tooltips */
+.tooltip {
+    -fx-background-color: #49202C;
+    -fx-text-fill: white;
+    -fx-background-radius: 6px;
+    -fx-padding: 8px;
+}
+/* GLASS EFFECT FOR LAB PANELS */
+.lab-panel {
+    -fx-background-color: rgba(255, 255, 255, 0.82);
+    -fx-background-radius: 16px;
+    -fx-border-color: rgba(255, 255, 255, 0.95);
+    -fx-border-width: 1.2px;
+    -fx-border-radius: 16px;
+    -fx-effect: dropshadow(
+        gaussian,
+        rgba(74, 48, 54, 0.13),
+        18, 0, 0, 5
+    );
+}

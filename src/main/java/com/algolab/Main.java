@@ -60,6 +60,8 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Region;
 import com.algolab.sorting.visualizer.SortingEngine;
 import com.algolab.sorting.visualizer.SortingStep;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.paint.Color;
 
 public class Main extends Application {
 
@@ -77,27 +79,39 @@ public class Main extends Application {
         sidebar.setPadding(new Insets(28, 18, 25, 18));
         sidebar.setPrefWidth(230);
         sidebar.setMinWidth(210);
-        sidebar.setStyle("-fx-background-color: " + BURGUNDY + ";");
-
+        sidebar.setStyle(
+        "-fx-background-color: linear-gradient(to bottom, #351722, #542638, #3D202D);" +
+        "-fx-border-color: rgba(255,255,255,0.12);" +
+        "-fx-border-width: 0 1 0 0;"
+);
         Label logo = new Label("ALGORITHM\nEXPLORER");
-        logo.setStyle(
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 23px;" +
-                "-fx-font-weight: bold;"
-        );
+logo.setStyle(
+        "-fx-text-fill: #FFFFFF;" +
+        "-fx-font-size: 24px;" +
+        "-fx-font-weight: bold;" +
+        "-fx-line-spacing: 5px;"
+);
 
         Label menuLabel = new Label("MAIN MENU");
         menuLabel.setStyle(
-                "-fx-text-fill: #D9BDBD;" +
-                "-fx-font-size: 11px;" +
-                "-fx-font-weight: bold;"
-        );
+        "-fx-text-fill: #D6A6A0;" +
+        "-fx-font-size: 10px;" +
+        "-fx-font-weight: bold;" +
+        "-fx-letter-spacing: 2px;"
+);
 
         Button dashboardButton = createNavButton("Dashboard");
         Button recursionButton = createNavButton("Recursion Lab");
         Button dataButton = createNavButton("Data Structures Lab");
         Button sortingButton = createNavButton("Sorting Lab");
         Button analysisButton = createNavButton("Time Complexity Analysis");
+        Button[] navButtons = {
+        dashboardButton,
+        recursionButton,
+        dataButton,
+        sortingButton,
+        analysisButton
+};
 
         sidebar.getChildren().addAll(
                 logo,
@@ -124,26 +138,39 @@ public class Main extends Application {
         root.setLeft(sidebarScroll);
 
         showPage(root, createDashboard(root));
+        setActiveNavButton(dashboardButton, navButtons);
 
         // NAVIGATION
-        dashboardButton.setOnAction(e ->
-                showPage(root, createDashboard(root)));
+        // NAVIGATION
+dashboardButton.setOnAction(e -> {
+    showPage(root, createDashboard(root));
+    setActiveNavButton(dashboardButton, navButtons);
+});
 
-        recursionButton.setOnAction(e ->
-                showPage(root, createRecursionPage()));
+recursionButton.setOnAction(e -> {
+    showPage(root, createRecursionPage());
+    setActiveNavButton(recursionButton, navButtons);
+});
 
-        dataButton.setOnAction(e ->
-        showPage(root, createDataStructuresPage(root)));
+dataButton.setOnAction(e -> {
+    showPage(root, createDataStructuresPage(root));
+    setActiveNavButton(dataButton, navButtons);
+});
 
-        
-        sortingButton.setOnAction(e ->
-                showPage(root, createSortingPage(root)));
+sortingButton.setOnAction(e -> {
+    showPage(root, createSortingPage(root));
+    setActiveNavButton(sortingButton, navButtons);
+});
 
-
-        analysisButton.setOnAction(e ->
-                showPage(root, createComplexityPage()));
-
+analysisButton.setOnAction(e -> {
+    showPage(root, createComplexityPage());
+    setActiveNavButton(analysisButton, navButtons);
+});
         Scene scene = new Scene(root, 1200, 780);
+
+        scene.getStylesheets().add(
+        getClass().getResource("/styles/algolab.css").toExternalForm()
+);
 
         stage.setTitle("Algorithm Explorer");
         stage.setMinWidth(950);
@@ -171,120 +198,352 @@ public class Main extends Application {
     }
 
     // SIDEBAR BUTTON
-    private Button createNavButton(String text) {
+    // SIDEBAR BUTTON
+private Button createNavButton(String text) {
 
-        Button button = new Button(text);
+    Button button = new Button(text);
 
-        button.setMaxWidth(Double.MAX_VALUE);
-        button.setAlignment(Pos.CENTER_LEFT);
-        button.setPadding(new Insets(12));
+    button.setMaxWidth(Double.MAX_VALUE);
+    button.setAlignment(Pos.CENTER_LEFT);
+    button.setPadding(new Insets(13, 14, 13, 14));
+
+    button.setStyle(
+            "-fx-background-color: transparent;" +
+            "-fx-text-fill: #F5E9EC;" +
+            "-fx-font-size: 13px;" +
+            "-fx-background-radius: 10;" +
+            "-fx-cursor: hand;"
+    );
+
+    button.setOnMouseEntered(e -> button.setStyle(
+            "-fx-background-color: rgba(214,166,160,0.22);" +
+            "-fx-text-fill: white;" +
+            "-fx-font-size: 13px;" +
+            "-fx-background-radius: 10;" +
+            "-fx-border-color: rgba(214,166,160,0.45);" +
+            "-fx-border-radius: 10;" +
+            "-fx-cursor: hand;"
+    ));
+
+    button.setOnMouseExited(e -> {
+
+    if (Boolean.TRUE.equals(button.getUserData())) {
+
+        button.setStyle(
+                "-fx-background-color: linear-gradient(to right, #8A5061, #754252);" +
+                "-fx-text-fill: white;" +
+                "-fx-font-size: 13px;" +
+                "-fx-font-weight: bold;" +
+                "-fx-background-radius: 10;" +
+                "-fx-border-color: rgba(255,255,255,0.45);" +
+                "-fx-border-radius: 10;" +
+                "-fx-border-width: 1;"
+        );
+
+    } else {
 
         button.setStyle(
                 "-fx-background-color: transparent;" +
-                "-fx-text-fill: white;" +
+                "-fx-text-fill: #F5E9EC;" +
                 "-fx-font-size: 13px;" +
+                "-fx-background-radius: 10;" +
                 "-fx-cursor: hand;"
         );
-
-        button.setOnMouseEntered(e -> button.setStyle(
-                "-fx-background-color: #793333;" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 13px;" +
-                "-fx-background-radius: 6;" +
-                "-fx-cursor: hand;"
-        ));
-
-        button.setOnMouseExited(e -> button.setStyle(
-                "-fx-background-color: transparent;" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 13px;" +
-                "-fx-cursor: hand;"
-        ));
-
-        return button;
     }
+});
+    return button;
+}
 
-    // DASHBOARD
-    private VBox createDashboard(BorderPane root) {
-        VBox page = new VBox(22);
-        page.setPadding(new Insets(35));
-        page.setStyle("-fx-background-color: " + LIGHT_GREY + ";");
+// ACTIVE NAVIGATION STYLE
+private void setActiveNavButton(
+        Button activeButton, Button[] navButtons) {
 
-        Label heading = new Label("Welcome to Algorithm Explorer");
+    for (Button button : navButtons) {
+        button.setUserData(button == activeButton);
+        if (button == activeButton) {
 
-        heading.setStyle(
-                "-fx-font-size: 28px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: " + BURGUNDY + ";"
-        );
+            button.setStyle(
+                    "-fx-background-color: linear-gradient(to right, #8A5061, #754252);" +
+                    "-fx-text-fill: white;" +
+                    "-fx-font-size: 13px;" +
+                    "-fx-font-weight: bold;" +
+                    "-fx-background-radius: 10;" +
+                    "-fx-border-color: rgba(255,255,255,0.45);" +
+                    "-fx-border-radius: 10;" +
+                    "-fx-border-width: 1;"
+            );
 
-        Label description = new Label(
-                "An interactive learning environment for exploring algorithms, " +
-                "data structures and their performance."
-        );
+        } else {
 
-        description.setWrapText(true);
-
-        GridPane cards = new GridPane();
-        cards.setHgap(20);
-        cards.setVgap(20);
-
-        cards.getColumnConstraints().addAll(
-                columnConstraint(),
-                columnConstraint()
-        );
-
-        VBox recursionCard = createCard(
-        "Recursion Lab",
-        "Explore Fibonacci, Factorial and Tower of Hanoi."
-        );
-
-        VBox dataCard = createCard(
-                "Data Structures Lab",
-                "Learn stacks, queues, arrays and linked lists."
-        );
-
-        VBox sortingCard = createCard(
-                "Sorting Lab",
-                "Explore and compare sorting algorithms."
-        );
-
-        VBox analysisCard = createCard(
-                "Time Complexity Analysis",
-                "Benchmark algorithms and compare performance."
-        );
-
-        // MAKE DASHBOARD CARDS CLICKABLE
-
-        recursionCard.setOnMouseClicked(e ->
-                showPage(root, createRecursionPage()));
-
-        dataCard.setOnMouseClicked(e ->
-                showPage(root, createDataStructuresPage(root)));
-
-       sortingCard.setOnMouseClicked(e ->
-        showPage(root, createSortingPage(root)));
-
-        analysisCard.setOnMouseClicked(e ->
-                showPage(root, createComplexityPage()));
-
-        // ADD CARDS TO DASHBOARD
-
-        cards.add(recursionCard, 0, 0);
-        cards.add(dataCard, 1, 0);
-        cards.add(sortingCard, 0, 1);
-        cards.add(analysisCard, 1, 1);
-
-        page.getChildren().addAll(
-                heading,
-                description,
-                new Separator(),
-                createSectionTitle("Learning Modules"),
-                cards
-        );
-
-        return page;
+            button.setStyle(
+                    "-fx-background-color: transparent;" +
+                    "-fx-text-fill: #F5E9EC;" +
+                    "-fx-font-size: 13px;" +
+                    "-fx-background-radius: 10;" +
+                    "-fx-cursor: hand;"
+            );
+        }
     }
+}
+
+    
+// DASHBOARD
+private VBox createDashboard(BorderPane root) {
+
+    VBox page = new VBox(25);
+    page.setPadding(new Insets(32));
+    page.setStyle(
+        "-fx-background-color: linear-gradient(to bottom right, #E8DCE0, #DDE3EC, #EEE5D9);"
+);
+    // WELCOME BANNER
+    VBox hero = new VBox(12);
+    hero.setPadding(new Insets(30, 32, 30, 32));
+    hero.setStyle(
+        "-fx-background-color: linear-gradient(to right, #512331, #783C50, #9A6471);" +
+        "-fx-background-radius: 22;" +
+        "-fx-border-color: rgba(255,255,255,0.55);" +
+        "-fx-border-radius: 22;" +
+        "-fx-border-width: 1;"
+);
+
+hero.setEffect(new DropShadow(
+        24,
+        Color.rgb(76, 35, 48, 0.22)
+));
+
+    Label eyebrow = new Label("ALGORITHM EXPLORER  /  LEARNING STUDIO");
+    eyebrow.setStyle(
+            "-fx-text-fill: #E8C9C5;" +
+            "-fx-font-size: 11px;" +
+            "-fx-font-weight: bold;"
+    );
+
+    Label heading = new Label("Welcome back, Explorer!");
+    heading.setStyle(
+            "-fx-font-size: 30px;" +
+            "-fx-font-weight: bold;" +
+            "-fx-text-fill: white;"
+    );
+
+    Label description = new Label(
+            "Discover algorithms, experiment with data structures, " +
+            "and understand how code performs."
+    );
+    description.setWrapText(true);
+    description.setStyle(
+            "-fx-font-size: 14px;" +
+            "-fx-text-fill: #F5E8E8;"
+    );
+
+    hero.getChildren().addAll(eyebrow, heading, description);
+
+    // QUICK OVERVIEW
+    HBox stats = new HBox(15);
+    stats.getChildren().addAll(
+            createDashboardStat("04", "LEARNING MODULES", "#642B3A"),
+            createDashboardStat("06+", "CORE TOPICS", "#8297B0"),
+            createDashboardStat("∞", "WAYS TO EXPLORE", "#78958B")
+    );
+
+    // MODULE SECTION
+    VBox moduleSection = new VBox(15);
+
+    Label sectionTitle = new Label("Explore your learning space");
+    sectionTitle.setStyle(
+            "-fx-font-size: 21px;" +
+            "-fx-font-weight: bold;" +
+            "-fx-text-fill: #3F3032;"
+    );
+
+    Label sectionDescription = new Label(
+            "Choose a module and start experimenting."
+    );
+    sectionDescription.setStyle(
+            "-fx-font-size: 13px;" +
+            "-fx-text-fill: #817477;"
+    );
+
+    GridPane cards = new GridPane();
+    cards.setHgap(18);
+    cards.setVgap(18);
+
+    cards.getColumnConstraints().addAll(
+            columnConstraint(),
+            columnConstraint()
+    );
+
+    VBox recursionCard = createDashboardCard(
+            "↻", "Recursion Lab",
+            "Explore Fibonacci, Factorial and Tower of Hanoi.",
+            "#D6A6A0"
+    );
+
+    VBox dataCard = createDashboardCard(
+            "◇", "Data Structures Lab",
+            "Discover stacks, queues, linked lists and balanced brackets.",
+            "#8297B0"
+    );
+
+    VBox sortingCard = createDashboardCard(
+            "↗", "Sorting Lab",
+            "Explore and compare different sorting algorithms.",
+            "#78958B"
+    );
+
+    VBox analysisCard = createDashboardCard(
+            "◷", "Time Complexity Analysis",
+            "Benchmark algorithms and compare their performance.",
+            "#D49A54"
+    );
+
+    // PRESERVE EXISTING NAVIGATION
+    recursionCard.setOnMouseClicked(e ->
+            showPage(root, createRecursionPage()));
+
+    dataCard.setOnMouseClicked(e ->
+            showPage(root, createDataStructuresPage(root)));
+
+    sortingCard.setOnMouseClicked(e ->
+            showPage(root, createSortingPage(root)));
+
+    analysisCard.setOnMouseClicked(e ->
+            showPage(root, createComplexityPage()));
+
+    cards.add(recursionCard, 0, 0);
+    cards.add(dataCard, 1, 0);
+    cards.add(sortingCard, 0, 1);
+    cards.add(analysisCard, 1, 1);
+
+    moduleSection.getChildren().addAll(
+            sectionTitle,
+            sectionDescription,
+            cards
+    );
+
+    page.getChildren().addAll(hero, stats, moduleSection);
+
+    return page;
+}
+
+// DASHBOARD STATISTICS
+private VBox createDashboardStat(
+        String value, String caption, String accent) {
+
+    Label number = new Label(value);
+    number.setStyle(
+            "-fx-font-size: 24px;" +
+            "-fx-font-weight: bold;" +
+            "-fx-text-fill: " + accent + ";"
+    );
+
+    Label label = new Label(caption);
+    label.setStyle(
+            "-fx-font-size: 10px;" +
+            "-fx-font-weight: bold;" +
+            "-fx-text-fill: #817477;"
+    );
+
+    VBox stat = new VBox(6, number, label);
+    stat.setPadding(new Insets(15, 20, 15, 20));
+    stat.setAlignment(Pos.CENTER_LEFT);
+    stat.setMaxWidth(Double.MAX_VALUE);
+    stat.setStyle(
+        "-fx-background-color: #FFFFFF;" +
+        "-fx-background-radius: 16;" +
+        "-fx-border-color: #D6A6A0;" +
+        "-fx-border-width: 1.5;" +
+        "-fx-border-radius: 16;"
+);
+
+stat.setEffect(new DropShadow(
+        16,
+        Color.rgb(65, 40, 50, 0.09)
+));
+
+    HBox.setHgrow(stat, Priority.ALWAYS);
+
+    return stat;
+}
+
+// DASHBOARD MODULE CARD
+private VBox createDashboardCard(
+        String symbol,
+        String title,
+        String description,
+        String accent) {
+
+    Label icon = new Label(symbol);
+    icon.setStyle(
+            "-fx-font-size: 23px;" +
+            "-fx-text-fill: white;" +
+            "-fx-font-weight: bold;" +
+            "-fx-background-color: " + accent + ";" +
+            "-fx-background-radius: 12;" +
+            "-fx-padding: 10 15 10 15;"
+    );
+
+    Label cardTitle = new Label(title);
+    cardTitle.setStyle(
+            "-fx-font-size: 17px;" +
+            "-fx-font-weight: bold;" +
+            "-fx-text-fill: #4A3036;"
+    );
+
+    Label cardDescription = new Label(description);
+    cardDescription.setWrapText(true);
+    cardDescription.setStyle(
+            "-fx-font-size: 12px;" +
+            "-fx-text-fill: #817477;" +
+            "-fx-line-spacing: 3px;"
+    );
+
+    Label openLabel = new Label("Explore module  →");
+    openLabel.setStyle(
+            "-fx-font-size: 12px;" +
+            "-fx-font-weight: bold;" +
+            "-fx-text-fill: " + accent + ";"
+    );
+
+    VBox card = new VBox(13, icon, cardTitle, cardDescription, openLabel);
+    card.setPadding(new Insets(22));
+    card.setPrefHeight(190);
+    card.setMaxWidth(Double.MAX_VALUE);
+    card.setStyle(
+        "-fx-background-color: #FFFFFF;" +
+        "-fx-background-radius: 19;" +
+        "-fx-border-color: " + accent + ";" +
+        "-fx-border-width: 2;" +
+        "-fx-border-radius: 19;" +
+        "-fx-cursor: hand;"
+);
+card.setEffect(new DropShadow(
+        18,
+        Color.rgb(80, 35, 50, 0.12)
+));
+
+    // HOVER EFFECT
+    card.setOnMouseExited(e -> {
+    card.setStyle(
+            "-fx-background-color: rgba(255,255,255,0.72);" +
+            "-fx-background-radius: 19;" +
+            "-fx-border-color: rgba(255,255,255,0.95);" +
+            "-fx-border-width: 1.4;" +
+            "-fx-border-radius: 19;" +
+            "-fx-cursor: hand;"
+    );
+
+    card.setEffect(new DropShadow(
+            18,
+            Color.rgb(80, 35, 50, 0.12)
+    ));
+
+    card.setTranslateY(0);
+});
+
+return card;
+}
+
+    
 
     private ColumnConstraints columnConstraint() {
 
@@ -338,13 +597,23 @@ public class Main extends Application {
         return card;
     }
 
+    // SHARED LAB PAGE STYLING
+private void applyLabPageStyle(VBox page) {
+
+    page.getStyleClass().add("lab-page");
+
+    page.setStyle(
+            "-fx-background-color: linear-gradient(" +
+            "to bottom right, #F7F4F1, #EEE7E8, #E9EDF2);"
+    );
+}
+
     // RECURSION LAB
     private VBox createRecursionPage() {
 
         VBox page = new VBox(18);
-        page.setPadding(new Insets(28));
-        page.setStyle("-fx-background-color: " + LIGHT_GREY + ";");
-
+page.setPadding(new Insets(28));
+applyLabPageStyle(page);
         Label heading = new Label("Recursion Lab");
 
         heading.setStyle(
@@ -1324,13 +1593,7 @@ public class Main extends Application {
         card.setPadding(new Insets(20));
         card.setMaxWidth(Double.MAX_VALUE);
 
-        card.setStyle(
-                "-fx-background-color: white;" +
-                "-fx-background-radius: 9;" +
-                "-fx-border-color: #E2E2E2;" +
-                "-fx-border-radius: 9;"
-        );
-
+        card.getStyleClass().add("lab-panel");
         card.getChildren().add(heading);
         card.getChildren().addAll(components);
 
@@ -1393,9 +1656,8 @@ public class Main extends Application {
     private VBox createComplexityPage() {
 
         VBox page = new VBox(20);
-        page.setPadding(new Insets(35));
-        page.setStyle("-fx-background-color: " + LIGHT_GREY + ";");
-
+page.setPadding(new Insets(35));
+applyLabPageStyle(page);
         Label heading = new Label("Time Complexity Analysis");
         heading.setStyle(
                 "-fx-font-size: 28px;" +
@@ -1715,9 +1977,8 @@ public class Main extends Application {
     private VBox createDataStructuresPage(BorderPane root) {
 
         VBox page = new VBox(22);
-        page.setPadding(new Insets(35));
-        page.setStyle("-fx-background-color: " + LIGHT_GREY + ";");
-
+page.setPadding(new Insets(35));
+applyLabPageStyle(page);
         Label heading = new Label("Data Structures Lab");
         heading.setStyle(
                 "-fx-font-size: 28px;" +
@@ -1790,14 +2051,9 @@ public class Main extends Application {
         private VBox createModuleLabPage(BorderPane root, String moduleName) {
 
         VBox page = new VBox(20);
-        page.setPadding(new Insets(30));
-        page.setBackground(new Background(
-        new BackgroundFill(
-                javafx.scene.paint.Color.web(LIGHT_GREY),
-                CornerRadii.EMPTY,
-                Insets.EMPTY
-        )
-));
+page.setPadding(new Insets(30));
+applyLabPageStyle(page);
+
         Button backButton = createSecondaryButton("← Back to Data Structures");
         backButton.setOnAction(e ->
                 showPage(root, createDataStructuresPage(root)));
@@ -1917,12 +2173,7 @@ private VBox createStackInterface() {
     stackContainer.setAlignment(Pos.CENTER);
     stackContainer.setPadding(new Insets(15));
     stackContainer.setMinWidth(220);
-    stackContainer.setStyle(
-            "-fx-background-color: white;" +
-            "-fx-border-color: #D6D6D6;" +
-            "-fx-border-radius: 8;" +
-            "-fx-background-radius: 8;"
-    );
+    stackContainer.getStyleClass().add("lab-panel");
 
     stackContainer.getChildren().add(stackVisual);
 
@@ -2259,13 +2510,7 @@ buttons.getChildren().addAll(
     queueContainer.setAlignment(Pos.CENTER);
     queueContainer.setPadding(new Insets(15));
     queueContainer.setMinWidth(250);
-    queueContainer.setStyle(
-            "-fx-background-color: white;" +
-            "-fx-border-color: #D6D6D6;" +
-            "-fx-border-radius: 8;" +
-            "-fx-background-radius: 8;"
-    );
-
+    queueContainer.getStyleClass().add("lab-panel");
     Label queueTitle = new Label("QUEUE VISUALIZATION");
     queueTitle.setStyle(
             "-fx-font-size: 16px;" +
@@ -2603,11 +2848,7 @@ int[] operationCount = {0};
     queueVisual.setAlignment(Pos.CENTER);
     queueVisual.setPadding(new Insets(15));
 
-    queueVisual.setStyle(
-            "-fx-background-color: white;" +
-            "-fx-background-radius: 8;"
-    );
-
+    queueVisual.getStyleClass().add("lab-panel");
     Label positionLabel = new Label("Elements: 0 / " + capacity);
 
     Label pointerLabel = new Label("Front: -     Rear: -");
@@ -4277,9 +4518,8 @@ private VBox createBalancedBracketsInterface() {
 private VBox createSortingPage(BorderPane root) {
 
     VBox page = new VBox(22);
-    page.setPadding(new Insets(30));
-    page.setStyle("-fx-background-color: #f5f5f5;");
-
+page.setPadding(new Insets(30));
+applyLabPageStyle(page);
     Label title = new Label("Sorting Algorithms");
     title.setStyle("-fx-font-size: 28px; -fx-font-weight: bold;");
 
